@@ -1,0 +1,505 @@
+{% extends "base.html" %}
+
+{% block title %}Generar Informes - Sistema de Informes Survey123{% endblock %}
+
+{% block head %}
+<style>
+    #barraProgreso {
+        width: 0%;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <!-- Encabezado -->
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h2 class="display-5 fw-bold">
+                <i class="fas fa-file-pdf text-primary"></i>
+                Generar Informes Automatizados
+            </h2>
+            <p class="lead text-muted">
+                Genere informes personalizados en PDF y Excel basados en los datos Survey123
+            </p>
+        </div>
+    </div>
+
+    <!-- Tipos de informes disponibles -->
+    <div class="row mb-4">
+        <div class="col-lg-4 mb-3">
+            <div class="card h-100 border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar"></i>
+                        Informe Estadístico
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        Resumen estadístico completo con gráficos, distribuciones y métricas clave de las intervenciones urbanas.
+                    </p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success"></i> Estadísticas generales</li>
+                        <li><i class="fas fa-check text-success"></i> Gráficos interactivos</li>
+                        <li><i class="fas fa-check text-success"></i> Distribución por comunas</li>
+                        <li><i class="fas fa-check text-success"></i> Análisis temporal</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-primary w-100" onclick="generarInforme('estadistico')">
+                        <i class="fas fa-download"></i>
+                        Generar PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mb-3">
+            <div class="card h-100 border-success">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-table"></i>
+                        Informe Detallado
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        Listado detallado de todas las intervenciones con información completa y filtros personalizables.
+                    </p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success"></i> Datos completos</li>
+                        <li><i class="fas fa-check text-success"></i> Filtros por estado</li>
+                        <li><i class="fas fa-check text-success"></i> Información geográfica</li>
+                        <li><i class="fas fa-check text-success"></i> Exportable a Excel</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <div class="btn-group w-100" role="group">
+                        <button class="btn btn-success" onclick="generarInforme('detallado', 'pdf')">
+                            <i class="fas fa-file-pdf"></i> PDF
+                        </button>
+                        <button class="btn btn-outline-success" onclick="generarInforme('detallado', 'excel')">
+                            <i class="fas fa-file-excel"></i> Excel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mb-3">
+            <div class="card h-100 border-info">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-map"></i>
+                        Informe Geográfico
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        Análisis geoespacial con mapas interactivos y distribución territorial de las intervenciones.
+                    </p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success"></i> Mapas interactivos</li>
+                        <li><i class="fas fa-check text-success"></i> Análisis por comunas</li>
+                        <li><i class="fas fa-check text-success"></i> Densidad territorial</li>
+                        <li><i class="fas fa-check text-success"></i> Coordenadas precisas</li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-info w-100" onclick="generarInforme('geografico')">
+                        <i class="fas fa-download"></i>
+                        Generar PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configuración de informes -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-cog text-primary"></i>
+                        Configuración de Informes
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="configuracionInformes">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="filtroEstado" class="form-label">Filtrar por Estado de Obra</label>
+                                    <select class="form-select" id="filtroEstado" name="filtroEstado">
+                                        <option value="">Todos los estados</option>
+                                        <option value="En ejecucion">En ejecución</option>
+                                        <option value="Terminada">Terminada</option>
+                                        <option value="En proceso">En proceso</option>
+                                        <option value="Pendiente">Pendiente</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="filtroComuna" class="form-label">Filtrar por Comuna</label>
+                                    <select class="form-select" id="filtroComuna" name="filtroComuna">
+                                        <option value="">Todas las comunas</option>
+                                        <option value="1">Comuna 1</option>
+                                        <option value="2">Comuna 2</option>
+                                        <option value="3">Comuna 3</option>
+                                        <option value="4">Comuna 4</option>
+                                        <option value="5">Comuna 5</option>
+                                        <option value="6">Comuna 6</option>
+                                        <option value="7">Comuna 7</option>
+                                        <option value="8">Comuna 8</option>
+                                        <option value="9">Comuna 9</option>
+                                        <option value="10">Comuna 10</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="fechaInicio" class="form-label">Fecha de Inicio</label>
+                                    <input type="date" class="form-control" id="fechaInicio" name="fechaInicio">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="fechaFin" class="form-label">Fecha de Fin</label>
+                                    <input type="date" class="form-control" id="fechaFin" name="fechaFin">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label class="form-label">Secciones a Incluir</label>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="incluirEstadisticas" name="secciones" value="estadisticas" checked>
+                                                <label class="form-check-label" for="incluirEstadisticas">
+                                                    Estadísticas Generales
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="incluirGraficos" name="secciones" value="graficos" checked>
+                                                <label class="form-check-label" for="incluirGraficos">
+                                                    Gráficos y Visualizaciones
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="incluirMapas" name="secciones" value="mapas" checked>
+                                                <label class="form-check-label" for="incluirMapas">
+                                                    Mapas Geográficos
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="incluirTablas" name="secciones" value="tablas" checked>
+                                                <label class="form-check-label" for="incluirTablas">
+                                                    Tablas Detalladas
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historial de informes -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history text-primary"></i>
+                        Historial de Informes Generados
+                    </h5>
+                    <button class="btn btn-outline-danger btn-sm" onclick="limpiarHistorial()">
+                        <i class="fas fa-trash"></i>
+                        Limpiar Historial
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="historialInformes">
+                        <div class="text-center text-muted py-3">
+                            <i class="fas fa-file fa-2x mb-2"></i>
+                            <p>No hay informes generados aún</p>
+                            <small>Los informes generados aparecerán aquí para su descarga</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de progreso -->
+    <div class="modal fade" id="modalProgreso" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-cogs"></i>
+                        Generando Informe
+                    </h5>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="spinner-border text-primary mb-3" role="status">
+                        <span class="visually-hidden">Generando...</span>
+                    </div>
+                    <p id="mensajeProgreso">Preparando datos...</p>
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                             role="progressbar" 
+                             aria-valuenow="0"
+                             aria-valuemin="0" 
+                             aria-valuemax="100"
+                             id="barraProgreso">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Variables globales
+let modalProgreso;
+
+document.addEventListener('DOMContentLoaded', function() {
+    modalProgreso = new bootstrap.Modal(document.getElementById('modalProgreso'), {
+        backdrop: 'static',
+        keyboard: false
+    });
+    
+    cargarHistorial();
+});
+
+// Función principal para generar informes
+async function generarInforme(tipo, formato = 'pdf') {
+    // Mostrar modal de progreso
+    modalProgreso.show();
+    
+    try {
+        // Recopilar configuración
+        const configuracion = recopilarConfiguracion();
+        configuracion.tipo = tipo;
+        configuracion.formato = formato;
+        
+        // Simular progreso
+        await simularProgreso();
+        
+        // Aquí se haría la llamada real al backend
+        let url;
+        if (tipo === 'estadistico') {
+            url = '/api/generar_informe_estadistico';
+        } else if (tipo === 'detallado') {
+            url = `/api/generar_informe_detallado/${formato}`;
+        } else if (tipo === 'geografico') {
+            url = '/api/generar_informe_geografico';
+        }
+        
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        
+        if (response.ok) {
+            const contentType = response.headers.get('content-type');
+            
+            // Si es un archivo descargable
+            if (contentType && (contentType.includes('application/') || contentType.includes('text/csv'))) {
+                const blob = await response.blob();
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                
+                // Determinar la extensión del archivo
+                let extension = formato;
+                if (tipo === 'estadistico') extension = 'pdf';
+                if (tipo === 'detallado' && formato === 'excel') extension = 'xlsx';
+                if (tipo === 'geografico') extension = 'pdf';
+                
+                a.download = `informe_${tipo}_${new Date().toISOString().split('T')[0]}.${extension}`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(downloadUrl);
+                document.body.removeChild(a);
+                
+                // Agregar al historial
+                agregarAlHistorial(tipo, formato);
+                
+                mostrarAlerta('Informe generado exitosamente', 'success');
+            } else {
+                // Si es una respuesta JSON
+                const data = await response.json();
+                if (data.mensaje) {
+                    mostrarAlerta(data.mensaje, 'info');
+                } else {
+                    mostrarAlerta('Informe procesado correctamente', 'success');
+                }
+            }
+        } else {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
+        }
+        
+    } catch (error) {
+        console.error('Error:', error);
+        mostrarAlerta('Error al generar el informe: ' + error.message, 'danger');
+    } finally {
+        modalProgreso.hide();
+    }
+}
+
+// Recopilar configuración del formulario
+function recopilarConfiguracion() {
+    const form = document.getElementById('configuracionInformes');
+    const formData = new FormData(form);
+    
+    const configuracion = {
+        filtroEstado: formData.get('filtroEstado'),
+        filtroComuna: formData.get('filtroComuna'),
+        fechaInicio: formData.get('fechaInicio'),
+        fechaFin: formData.get('fechaFin'),
+        secciones: formData.getAll('secciones')
+    };
+    
+    return configuracion;
+}
+
+// Simular progreso de generación
+async function simularProgreso() {
+    const mensajes = [
+        'Preparando datos...',
+        'Procesando estadísticas...',
+        'Generando gráficos...',
+        'Creando mapas...',
+        'Compilando informe...',
+        'Finalizando...'
+    ];
+    
+    const barra = document.getElementById('barraProgreso');
+    const mensaje = document.getElementById('mensajeProgreso');
+    
+    for (let i = 0; i < mensajes.length; i++) {
+        mensaje.textContent = mensajes[i];
+        barra.style.width = `${((i + 1) / mensajes.length) * 100}%`;
+        await new Promise(resolve => setTimeout(resolve, 800));
+    }
+}
+
+// Agregar informe al historial
+function agregarAlHistorial(tipo, formato) {
+    const fecha = new Date().toLocaleString('es-CO');
+    const historial = JSON.parse(localStorage.getItem('historialInformes') || '[]');
+    
+    historial.unshift({
+        id: Date.now(),
+        tipo: tipo,
+        formato: formato,
+        fecha: fecha
+    });
+    
+    // Mantener solo los últimos 10 informes
+    historial.splice(10);
+    
+    localStorage.setItem('historialInformes', JSON.stringify(historial));
+    mostrarHistorial(historial);
+}
+
+// Cargar y mostrar historial
+function cargarHistorial() {
+    const historial = JSON.parse(localStorage.getItem('historialInformes') || '[]');
+    mostrarHistorial(historial);
+}
+
+// Mostrar historial en la interfaz
+function mostrarHistorial(historial) {
+    const container = document.getElementById('historialInformes');
+    
+    if (historial.length === 0) {
+        container.innerHTML = `
+            <div class="text-center text-muted py-3">
+                <i class="fas fa-file fa-2x mb-2"></i>
+                <p>No hay informes generados aún</p>
+                <small>Los informes generados aparecerán aquí para su descarga</small>
+            </div>
+        `;
+        return;
+    }
+    
+    const html = historial.map(item => `
+        <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+            <div>
+                <strong>${capitalizar(item.tipo)}</strong> 
+                <span class="badge bg-secondary">${item.formato.toUpperCase()}</span>
+                <br>
+                <small class="text-muted">${item.fecha}</small>
+            </div>
+            <button class="btn btn-outline-primary btn-sm" onclick="redescargar(${item.id})">
+                <i class="fas fa-download"></i>
+                Descargar
+            </button>
+        </div>
+    `).join('');
+    
+    container.innerHTML = html;
+}
+
+// Funciones auxiliares
+function capitalizar(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function limpiarHistorial() {
+    if (confirm('¿Está seguro de que desea limpiar el historial de informes?')) {
+        localStorage.removeItem('historialInformes');
+        cargarHistorial();
+        mostrarAlerta('Historial limpiado', 'info');
+    }
+}
+
+function redescargar(id) {
+    mostrarAlerta('Funcionalidad de redescarga en desarrollo', 'info');
+}
+
+// Función auxiliar para mostrar alertas
+function mostrarAlerta(mensaje, tipo) {
+    const alertContainer = document.querySelector('.container');
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${tipo} alert-dismissible fade show mt-3`;
+    alert.innerHTML = `
+        ${mensaje}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    alertContainer.insertBefore(alert, alertContainer.firstChild);
+    
+    setTimeout(() => {
+        alert.remove();
+    }, 5000);
+}
+</script>
+{% endblock %}

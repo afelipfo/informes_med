@@ -1,0 +1,424 @@
+{% extends "base.html" %}
+
+{% block title %}Cargar Datos - Sistema de Informes Survey123{% endblock %}
+
+{% block head %}
+<style>
+    .hidden {
+        display: none !important;
+    }
+    .show {
+        display: block !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <!-- Encabezado -->
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h2 class="display-5 fw-bold">
+                <i class="fas fa-upload text-primary"></i>
+                Cargar Archivo Survey123
+            </h2>
+            <p class="lead text-muted">
+                Suba su archivo Excel de Survey123 para procesamiento automático
+            </p>
+        </div>
+    </div>
+
+    <!-- Área de carga de archivos -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-file-excel"></i>
+                        Seleccionar Archivo
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="uploadForm" enctype="multipart/form-data">
+                        <div class="mb-4">
+                            <label for="archivo" class="form-label">
+                                <strong>Archivo Survey123 (.xlsx o .xls)</strong>
+                            </label>
+                            <input 
+                                type="file" 
+                                class="form-control form-control-lg" 
+                                id="archivo" 
+                                name="archivo" 
+                                accept=".xlsx,.xls"
+                                required>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle"></i>
+                                Tamaño máximo: 16MB. Formatos permitidos: .xlsx, .xls
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                            <button type="submit" class="btn btn-primary btn-lg" id="btnProcesar">
+                                <i class="fas fa-cogs"></i>
+                                Procesar Archivo
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-lg" onclick="limpiarFormulario()">
+                                <i class="fas fa-trash"></i>
+                                Limpiar
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Spinner de carga -->
+                    <div class="text-center mt-4 loading-spinner" id="loadingSpinner">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Procesando...</span>
+                        </div>
+                        <p class="mt-2">Procesando archivo, por favor espere...</p>
+                    </div>
+
+                    <!-- Área de resultados -->
+                    <div id="resultadosProcesamiento" class="mt-4 hidden">
+                        <!-- Los resultados se cargarán aquí dinámicamente -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información sobre el formato esperado -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card bg-light">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle text-info"></i>
+                        Información del Formato Esperado
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-check-circle text-success"></i> Columnas Requeridas:</h6>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item border-0 bg-transparent">
+                                    <strong>Shape:</strong> Tipo de geometría
+                                </li>
+                                <li class="list-group-item border-0 bg-transparent">
+                                    <strong>X, Y:</strong> Coordenadas geográficas
+                                </li>
+                                <li class="list-group-item border-0 bg-transparent">
+                                    <strong>id_punto:</strong> Identificador único
+                                </li>
+                                <li class="list-group-item border-0 bg-transparent">
+                                    <strong>estado_obr:</strong> Estado de la obra
+                                </li>
+                                <li class="list-group-item border-0 bg-transparent">
+                                    <strong>fecha_dilig:</strong> Fecha de diligenciamiento
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-users text-primary"></i> Datos de Personal:</h6>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item border-0 bg-transparent">
+                                    <strong>num_cuadri:</strong> Número de cuadrillas
+                                </li>
+                                <li class="list-group-item border-0 bg-transparent">
+                                    <strong>cant_ayuda, cant_ofici:</strong> Tipos de trabajadores
+                                </li>
+                                <li class="list-group-item border-0 bg-transparent">
+                                    <strong>total_hora:</strong> Horas trabajadas
+                                </li>
+                                <li class="list-group-item border-0 bg-transparent">
+                                    <strong>horas_retr, horas_mini:</strong> Horas de maquinaria
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-warning mt-3" role="alert">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Importante:</strong> Asegúrese de que el archivo proviene directamente de Survey123 y mantiene la estructura original de columnas.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historial de archivos procesados -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history text-secondary"></i>
+                        Archivos Procesados Recientemente
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="historialArchivos">
+                        <p class="text-muted text-center">
+                            <i class="fas fa-inbox"></i>
+                            No hay archivos procesados en esta sesión
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Funciones auxiliares para manejo de visibilidad
+function showElement(id) {
+    const element = document.getElementById(id);
+    element.classList.remove('hidden');
+    element.classList.add('show');
+}
+
+function hideElement(id) {
+    const element = document.getElementById(id);
+    element.classList.remove('show');
+    element.classList.add('hidden');
+}
+
+document.getElementById('uploadForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData();
+    const archivo = document.getElementById('archivo').files[0];
+    
+    if (!archivo) {
+        mostrarAlerta('Por favor seleccione un archivo', 'warning');
+        return;
+    }
+    
+    // Validar tamaño del archivo (16MB)
+    if (archivo.size > 16 * 1024 * 1024) {
+        mostrarAlerta('El archivo es demasiado grande. Máximo 16MB permitido.', 'danger');
+        return;
+    }
+    
+    formData.append('archivo', archivo);
+    
+    // Mostrar spinner
+    showElement('loadingSpinner');
+    document.getElementById('btnProcesar').disabled = true;
+    hideElement('resultadosProcesamiento');
+    
+    fetch('/procesar_archivo', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Ocultar spinner
+        hideElement('loadingSpinner');
+        document.getElementById('btnProcesar').disabled = false;
+        
+        if (data.exito) {
+            mostrarResultadosExito(data);
+            agregarAlHistorial(data);
+        } else {
+            mostrarResultadosError(data);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        hideElement('loadingSpinner');
+        document.getElementById('btnProcesar').disabled = false;
+        mostrarAlerta('Error procesando el archivo. Intente nuevamente.', 'danger');
+    });
+});
+
+function mostrarResultadosExito(data) {
+    const resultadosDiv = document.getElementById('resultadosProcesamiento');
+    const resumen = data.resumen || {};
+    const archivo = resumen.archivo_procesado || {};
+    const validacion = resumen.validacion || {};
+    const estadisticas = resumen.estadisticas || {};
+    
+    resultadosDiv.innerHTML = `
+        <div class="alert alert-success" role="alert">
+            <h5><i class="fas fa-check-circle"></i> ¡Archivo Procesado Exitosamente!</h5>
+            <p class="mb-0">${data.mensaje || 'Archivo procesado correctamente'}</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <h6><i class="fas fa-database"></i> Estadísticas del Archivo</h6>
+                        <p class="mb-1">📊 Registros: ${archivo.filas || 0}</p>
+                        <p class="mb-1">📋 Columnas: ${archivo.columnas || 0}</p>
+                        <p class="mb-0">✅ Válido: ${validacion.es_valido ? 'Sí' : 'No'}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <h6><i class="fas fa-chart-bar"></i> KPIs Principales</h6>
+                        <p class="mb-1">👥 Trabajadores: ${estadisticas.total_trabajadores || 0}</p>
+                        <p class="mb-1">⏰ Horas: ${estadisticas.total_horas || 0}</p>
+                        <p class="mb-0">🏗️ Intervenciones: ${estadisticas.total_intervenciones || 0}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-3">
+            <div class="btn-group" role="group">
+                <a href="/ver_analisis" class="btn btn-primary">
+                    <i class="fas fa-chart-line"></i> Ver Análisis Completo
+                </a>
+                <a href="/generar_informe" class="btn btn-success">
+                    <i class="fas fa-file-pdf"></i> Generar Informe
+                </a>
+                <a href="/mapa_intervenciones" class="btn btn-info">
+                    <i class="fas fa-map-marked-alt"></i> Ver Mapa
+                </a>
+            </div>
+        </div>
+    `;
+    
+    showElement('resultadosProcesamiento');
+    
+    // Scroll a los resultados
+    resultadosDiv.scrollIntoView({ behavior: 'smooth' });
+}
+
+function mostrarResultadosError(data) {
+    const resultadosDiv = document.getElementById('resultadosProcesamiento');
+    
+    let detallesError = '';
+    if (data.errores && Array.isArray(data.errores)) {
+        detallesError = '<ul class="mb-0">';
+        data.errores.forEach(error => {
+            detallesError += `<li>${error}</li>`;
+        });
+        detallesError += '</ul>';
+    } else if (data.detalles) {
+        detallesError = `<p class="mb-0">${JSON.stringify(data.detalles)}</p>`;
+    }
+    
+    resultadosDiv.innerHTML = `
+        <div class="alert alert-danger" role="alert">
+            <h5><i class="fas fa-exclamation-circle"></i> Error Procesando Archivo</h5>
+            <p><strong>Mensaje:</strong> ${data.error || 'Error desconocido'}</p>
+            ${detallesError}
+        </div>
+        
+        <div class="card border-warning">
+            <div class="card-header bg-warning">
+                <h6 class="mb-0"><i class="fas fa-lightbulb"></i> Sugerencias</h6>
+            </div>
+            <div class="card-body">
+                <ul class="mb-0">
+                    <li>Verifique que el archivo sea un Excel válido (.xlsx o .xls)</li>
+                    <li>Asegúrese de que el archivo proviene de Survey123</li>
+                    <li>Revise que las columnas requeridas estén presentes</li>
+                    <li>Verifique que no hay caracteres especiales en los nombres de columnas</li>
+                </ul>
+            </div>
+        </div>
+    `;
+    
+    showElement('resultadosProcesamiento');
+    resultadosDiv.scrollIntoView({ behavior: 'smooth' });
+}
+
+function agregarAlHistorial(data) {
+    const historialDiv = document.getElementById('historialArchivos');
+    const fecha = new Date().toLocaleString('es-CO');
+    const resumen = data.resumen || {};
+    const archivo = resumen.archivo_procesado || {};
+    
+    const item = `
+        <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+            <div>
+                <strong>${data.archivo_original || 'Archivo procesado'}</strong>
+                <br>
+                <small class="text-muted">
+                    <i class="fas fa-clock"></i> ${fecha} - 
+                    ${archivo.filas || 0} registros
+                </small>
+            </div>
+            <span class="badge bg-success">
+                <i class="fas fa-check"></i> Procesado
+            </span>
+        </div>
+    `;
+    
+    if (historialDiv.innerHTML.includes('No hay archivos')) {
+        historialDiv.innerHTML = item;
+    } else {
+        historialDiv.insertAdjacentHTML('afterbegin', item);
+    }
+}
+
+function limpiarFormulario() {
+    document.getElementById('uploadForm').reset();
+    hideElement('resultadosProcesamiento');
+    hideElement('loadingSpinner');
+    document.getElementById('btnProcesar').disabled = false;
+}
+
+// Drag and drop functionality
+const fileInput = document.getElementById('archivo');
+const dropZone = document.querySelector('.card-body');
+
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, preventDefaults, false);
+});
+
+function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+['dragenter', 'dragover'].forEach(eventName => {
+    dropZone.addEventListener(eventName, highlight, false);
+});
+
+['dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, unhighlight, false);
+});
+
+function highlight(e) {
+    dropZone.classList.add('border-primary', 'bg-light');
+}
+
+function unhighlight(e) {
+    dropZone.classList.remove('border-primary', 'bg-light');
+}
+
+dropZone.addEventListener('drop', handleDrop, false);
+
+function handleDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    
+    if (files.length > 0) {
+        fileInput.files = files;
+        
+        // Trigger change event
+        const event = new Event('change', { bubbles: true });
+        fileInput.dispatchEvent(event);
+    }
+}
+
+// Mostrar nombre del archivo seleccionado
+fileInput.addEventListener('change', function() {
+    if (this.files && this.files[0]) {
+        const fileName = this.files[0].name;
+        const fileSize = (this.files[0].size / 1024 / 1024).toFixed(2);
+        
+        mostrarAlerta(`Archivo seleccionado: ${fileName} (${fileSize} MB)`, 'info');
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,322 @@
+{% extends "base.html" %}
+
+{% block title %}Inicio - Sistema de Informes Survey123{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold mb-4">
+            <i class="fas fa-chart-bar"></i>
+            Sistema de Informes Automatizados
+        </h1>
+        <p class="lead mb-4">
+            Procese archivos de Survey123 y genere informes automáticos para la Secretaría de Infraestructura Física de Medellín
+        </p>
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <a href="{{ url_for('cargar_datos') }}" class="btn btn-light btn-lg">
+                        <i class="fas fa-upload"></i> Cargar Archivo Survey123
+                    </a>
+                    <a href="{{ url_for('ver_analisis') }}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-chart-line"></i> Ver Análisis
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Características Principales -->
+<div class="container my-5">
+    <div class="row text-center mb-5">
+        <div class="col-12">
+            <h2 class="display-5 fw-bold text-center mb-4">Características Principales</h2>
+            <p class="lead text-muted">Una solución completa para el procesamiento y análisis de datos de infraestructura</p>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <div class="feature-icon">
+                        <i class="fas fa-upload"></i>
+                    </div>
+                    <h5 class="card-title">Ingesta Automática</h5>
+                    <p class="card-text">
+                        Carga y valida automáticamente archivos Excel de Survey123 con verificación de integridad de datos.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <div class="feature-icon">
+                        <i class="fas fa-calculator"></i>
+                    </div>
+                    <h5 class="card-title">Cálculos Automáticos</h5>
+                    <p class="card-text">
+                        Genera KPIs y totales automáticamente: trabajadores, horas de maquinaria, actividades por obra.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <div class="feature-icon">
+                        <i class="fas fa-map-marked-alt"></i>
+                    </div>
+                    <h5 class="card-title">Georreferenciación</h5>
+                    <p class="card-text">
+                        Mapas interactivos que muestran la ubicación y estado de todas las intervenciones en tiempo real.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <div class="feature-icon">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <h5 class="card-title">Informes Automáticos</h5>
+                    <p class="card-text">
+                        Genera informes en PDF, Word y Excel con gráficos, tablas y análisis estadístico completo.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estadísticas Rápidas -->
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12">
+            <h3 class="text-center mb-4">¿Cómo Funciona?</h3>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        <div class="col-md-6 col-lg-3">
+            <div class="stats-card">
+                <div class="display-4 mb-2">
+                    <i class="fas fa-upload"></i>
+                </div>
+                <h5>1. Cargar Archivo</h5>
+                <p class="mb-0">Suba su archivo Excel de Survey123</p>
+            </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-3">
+            <div class="stats-card">
+                <div class="display-4 mb-2">
+                    <i class="fas fa-cogs"></i>
+                </div>
+                <h5>2. Procesamiento</h5>
+                <p class="mb-0">El sistema valida y procesa automáticamente</p>
+            </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-3">
+            <div class="stats-card">
+                <div class="display-4 mb-2">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <h5>3. Análisis</h5>
+                <p class="mb-0">Visualice estadísticas y KPIs en tiempo real</p>
+            </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-3">
+            <div class="stats-card">
+                <div class="display-4 mb-2">
+                    <i class="fas fa-download"></i>
+                </div>
+                <h5>4. Descargar</h5>
+                <p class="mb-0">Obtenga informes listos para usar</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tecnologías Utilizadas -->
+<div class="bg-light py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h3>Tecnologías Utilizadas</h3>
+                <p class="text-muted">Construido con las mejores herramientas y tecnologías</p>
+            </div>
+        </div>
+        
+        <div class="row text-center">
+            <div class="col-6 col-md-4 col-lg-2 mb-4">
+                <div class="card border-0 bg-transparent">
+                    <div class="card-body">
+                        <i class="fab fa-python display-4 text-primary mb-2"></i>
+                        <h6>Python</h6>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-6 col-md-4 col-lg-2 mb-4">
+                <div class="card border-0 bg-transparent">
+                    <div class="card-body">
+                        <i class="fas fa-flask display-4 text-success mb-2"></i>
+                        <h6>Flask</h6>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-6 col-md-4 col-lg-2 mb-4">
+                <div class="card border-0 bg-transparent">
+                    <div class="card-body">
+                        <i class="fas fa-chart-line display-4 text-info mb-2"></i>
+                        <h6>Pandas</h6>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-6 col-md-4 col-lg-2 mb-4">
+                <div class="card border-0 bg-transparent">
+                    <div class="card-body">
+                        <i class="fas fa-map display-4 text-warning mb-2"></i>
+                        <h6>Folium</h6>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-6 col-md-4 col-lg-2 mb-4">
+                <div class="card border-0 bg-transparent">
+                    <div class="card-body">
+                        <i class="fab fa-bootstrap display-4 text-secondary mb-2"></i>
+                        <h6>Bootstrap</h6>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-6 col-md-4 col-lg-2 mb-4">
+                <div class="card border-0 bg-transparent">
+                    <div class="card-body">
+                        <i class="fas fa-brain display-4 text-danger mb-2"></i>
+                        <h6>AI/ML</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Call to Action -->
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center py-5">
+                    <h3 class="card-title">¿Listo para Comenzar?</h3>
+                    <p class="card-text lead">
+                        Cargue su archivo de Survey123 y genere informes profesionales en minutos
+                    </p>
+                    <div class="d-flex flex-wrap justify-content-center gap-3">
+                        <a href="{{ url_for('cargar_datos') }}" class="btn btn-light btn-lg">
+                            <i class="fas fa-rocket"></i> Comenzar Ahora
+                        </a>
+                        <a href="#" class="btn btn-outline-light btn-lg" data-bs-toggle="modal" data-bs-target="#tutorialModal">
+                            <i class="fas fa-play-circle"></i> Ver Tutorial
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Tutorial -->
+<div class="modal fade" id="tutorialModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-graduation-cap"></i> Tutorial Rápido
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" title="Cerrar tutorial"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-12">
+                        <h6><i class="fas fa-step-forward"></i> Pasos para usar el sistema:</h6>
+                        <ol class="list-group list-group-numbered">
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold">Preparar Archivo</div>
+                                    Asegúrese de que su archivo Excel de Survey123 tenga la estructura correcta
+                                </div>
+                                <span class="badge bg-primary rounded-pill">1</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold">Cargar Datos</div>
+                                    Use la sección "Cargar Datos" para subir su archivo
+                                </div>
+                                <span class="badge bg-primary rounded-pill">2</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold">Revisar Análisis</div>
+                                    Vea las estadísticas y gráficos generados automáticamente
+                                </div>
+                                <span class="badge bg-primary rounded-pill">3</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold">Generar Informe</div>
+                                    Descargue informes en PDF, Word o Excel
+                                </div>
+                                <span class="badge bg-primary rounded-pill">4</span>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <a href="{{ url_for('cargar_datos') }}" class="btn btn-primary">Comenzar</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Animaciones adicionales para la página principal
+    document.addEventListener('DOMContentLoaded', function() {
+        // Contador animado para estadísticas (si fuera necesario)
+        const statsCards = document.querySelectorAll('.stats-card');
+        
+        // Observer para animar cuando entren en vista
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.transform = 'scale(1.05)';
+                    setTimeout(() => {
+                        entry.target.style.transform = 'scale(1)';
+                    }, 300);
+                }
+            });
+        });
+        
+        statsCards.forEach(card => {
+            observer.observe(card);
+        });
+    });
+</script>
+{% endblock %}
