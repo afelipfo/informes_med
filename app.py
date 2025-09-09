@@ -45,9 +45,11 @@ def crear_aplicacion():
     # Marcar tiempo de inicio para uptime
     app.start_time = time.time()
     
-    # Configurar logging
+    # Configurar logging - reducir mensajes de Werkzeug
     if not app.debug:
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(level=logging.WARNING)
+        # Reducir logging de Werkzeug
+        logging.getLogger('werkzeug').setLevel(logging.WARNING)
     
     # Variables globales de la aplicación
     app.datos_cargados = None
@@ -598,17 +600,11 @@ def crear_aplicacion():
     return app
 
 if __name__ == '__main__':
-    print("=" * 60)
     print("🚀 INICIANDO SISTEMA DE INFORMES SURVEY123")
     print("🏛️  Secretaría de Infraestructura Física de Medellín")
-    print("=" * 60)
+    print()
     
     app = crear_aplicacion()
-    
-    print(f"📱 Aplicación disponible en: http://localhost:5000")
-    print(f"🔧 Modo debug: {app.debug}")
-    print(f"📁 Directorio de trabajo: {os.getcwd()}")
-    print("=" * 60)
     
     app.run(host='0.0.0.0', port=5000, debug=False)
 else:
