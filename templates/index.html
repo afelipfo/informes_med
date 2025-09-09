@@ -147,74 +147,6 @@
     </div>
 </div>
 
-<!-- Tecnologías Utilizadas -->
-<div class="bg-light py-5">
-    <div class="container">
-        <div class="row">
-            <div class="col-12 text-center mb-5">
-                <h3>Tecnologías Utilizadas</h3>
-                <p class="text-muted">Construido con las mejores herramientas y tecnologías</p>
-            </div>
-        </div>
-        
-        <div class="row text-center">
-            <div class="col-6 col-md-4 col-lg-2 mb-4">
-                <div class="card border-0 bg-transparent">
-                    <div class="card-body">
-                        <i class="fab fa-python display-4 text-primary mb-2"></i>
-                        <h6>Python</h6>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-6 col-md-4 col-lg-2 mb-4">
-                <div class="card border-0 bg-transparent">
-                    <div class="card-body">
-                        <i class="fas fa-flask display-4 text-success mb-2"></i>
-                        <h6>Flask</h6>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-6 col-md-4 col-lg-2 mb-4">
-                <div class="card border-0 bg-transparent">
-                    <div class="card-body">
-                        <i class="fas fa-chart-line display-4 text-info mb-2"></i>
-                        <h6>Pandas</h6>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-6 col-md-4 col-lg-2 mb-4">
-                <div class="card border-0 bg-transparent">
-                    <div class="card-body">
-                        <i class="fas fa-map display-4 text-warning mb-2"></i>
-                        <h6>Folium</h6>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-6 col-md-4 col-lg-2 mb-4">
-                <div class="card border-0 bg-transparent">
-                    <div class="card-body">
-                        <i class="fab fa-bootstrap display-4 text-secondary mb-2"></i>
-                        <h6>Bootstrap</h6>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-6 col-md-4 col-lg-2 mb-4">
-                <div class="card border-0 bg-transparent">
-                    <div class="card-body">
-                        <i class="fas fa-brain display-4 text-danger mb-2"></i>
-                        <h6>AI/ML</h6>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Call to Action -->
 <div class="container my-5">
     <div class="row">
@@ -229,66 +161,8 @@
                         <a href="{{ url_for('cargar_datos') }}" class="btn btn-light btn-lg">
                             <i class="fas fa-rocket"></i> Comenzar Ahora
                         </a>
-                        <a href="#" class="btn btn-outline-light btn-lg" data-bs-toggle="modal" data-bs-target="#tutorialModal">
-                            <i class="fas fa-play-circle"></i> Ver Tutorial
-                        </a>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Tutorial -->
-<div class="modal fade" id="tutorialModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-graduation-cap"></i> Tutorial Rápido
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" title="Cerrar tutorial"></button>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-12">
-                        <h6><i class="fas fa-step-forward"></i> Pasos para usar el sistema:</h6>
-                        <ol class="list-group list-group-numbered">
-                            <li class="list-group-item d-flex justify-content-between align-items-start">
-                                <div class="ms-2 me-auto">
-                                    <div class="fw-bold">Preparar Archivo</div>
-                                    Asegúrese de que su archivo Excel de Survey123 tenga la estructura correcta
-                                </div>
-                                <span class="badge bg-primary rounded-pill">1</span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-start">
-                                <div class="ms-2 me-auto">
-                                    <div class="fw-bold">Cargar Datos</div>
-                                    Use la sección "Cargar Datos" para subir su archivo
-                                </div>
-                                <span class="badge bg-primary rounded-pill">2</span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-start">
-                                <div class="ms-2 me-auto">
-                                    <div class="fw-bold">Revisar Análisis</div>
-                                    Vea las estadísticas y gráficos generados automáticamente
-                                </div>
-                                <span class="badge bg-primary rounded-pill">3</span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-start">
-                                <div class="ms-2 me-auto">
-                                    <div class="fw-bold">Generar Informe</div>
-                                    Descargue informes en PDF, Word o Excel
-                                </div>
-                                <span class="badge bg-primary rounded-pill">4</span>
-                            </li>
-                        </ol>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <a href="{{ url_for('cargar_datos') }}" class="btn btn-primary">Comenzar</a>
             </div>
         </div>
     </div>

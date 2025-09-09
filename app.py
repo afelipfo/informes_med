@@ -45,11 +45,21 @@ def crear_aplicacion():
     # Marcar tiempo de inicio para uptime
     app.start_time = time.time()
     
-    # Configurar logging - reducir mensajes de Werkzeug
+    # Configurar logging - mostrar solo mensajes esenciales
     if not app.debug:
-        logging.basicConfig(level=logging.WARNING)
-        # Reducir logging de Werkzeug
-        logging.getLogger('werkzeug').setLevel(logging.WARNING)
+        # Configurar logging para mostrar solo el mensaje de inicio del servidor
+        logging.basicConfig(
+            level=logging.INFO,
+            format=' * %(message)s',
+            handlers=[logging.StreamHandler()]
+        )
+        # Configurar Werkzeug para mostrar solo el mensaje de inicio
+        werkzeug_logger = logging.getLogger('werkzeug')
+        werkzeug_logger.setLevel(logging.INFO)
+        werkzeug_logger.handlers = []
+        handler = logging.StreamHandler()
+        handler.setFormatter(logging.Formatter(' * %(message)s'))
+        werkzeug_logger.addHandler(handler)
     
     # Variables globales de la aplicación
     app.datos_cargados = None
@@ -602,11 +612,10 @@ def crear_aplicacion():
 if __name__ == '__main__':
     print("🚀 INICIANDO SISTEMA DE INFORMES SURVEY123")
     print("🏛️  Secretaría de Infraestructura Física de Medellín")
-    print()
     
     app = crear_aplicacion()
     
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    app.run(host='127.0.0.1', port=5000, debug=False)
 else:
     # Para importación directa
     app = crear_aplicacion()
