@@ -126,7 +126,7 @@ class ProcesadorSurvey123:
                 return None
             
             # Validar estructura
-            validacion = self.validar_estructura(self.df_original)
+            validacion = self.validar_estructura_dataframe(self.df_original)
             if not validacion['valido']:
                 self.logger.error(f"Validación falló: {validacion['errores']}")
                 return None
@@ -140,7 +140,7 @@ class ProcesadorSurvey123:
             self.logger.error(f"Error procesando archivo: {str(e)}")
             return None
     
-    def validar_estructura(self, datos: pd.DataFrame) -> dict:
+    def validar_estructura_dataframe(self, datos: pd.DataFrame) -> dict:
         """
         Valida la estructura de un DataFrame
         
@@ -207,6 +207,21 @@ class ProcesadorSurvey123:
                 if campo in df_limpio.columns:
                     df_limpio[campo] = df_limpio[campo].fillna('').astype(str)
                     df_limpio = df_limpio[df_limpio[campo].str.strip() != '']
+            
+            # Convertir campos numéricos problemáticos
+            campos_numericos = ['cant_ayuda', 'cant_ofici', 'cant_opera', 'cant_auxil', 'cant_otros',
+                              'horas_retr', 'horas_mini', 'horas_volq', 'horas_comp', 'horas_otra',
+                              'total_hora', 'num_cuadri']
+            
+            for campo in campos_numericos:
+                if campo in df_limpio.columns:
+                    df_limpio[campo] = pd.to_numeric(df_limpio[campo], errors='coerce').fillna(0)
+            
+            # Convertir campos booleanos problemáticos a string primero
+            for col in df_limpio.columns:
+                if hasattr(df_limpio[col].dtype, 'name') and 'bool' in str(df_limpio[col].dtype):
+                    df_limpio[col] = df_limpio[col].astype(str).replace({'True': '1', 'False': '0', 'nan': '0'})
+                    df_limpio[col] = pd.to_numeric(df_limpio[col], errors='coerce').fillna(0)
             
             self.logger.info(f"Datos limpiados: {len(datos)} -> {len(df_limpio)} registros")
             return df_limpio
@@ -337,24 +352,39 @@ class ProcesadorSurvey123:
         Returns:
             Tuple[bool, Dict]: (éxito, resumen)
         """
-        # Cargar archivo
-        if not self.cargar_archivo(ruta_archivo):
-            return False, {"error": "No se pudo cargar el archivo"}
-        
-        # Validar estructura
-        if not self.validar_estructura():
-            return False, {"error": "Estructura de archivo inválida", "errores": self.errores_validacion}
-        
-        # Limpiar datos
-        if not self.limpiar_datos():
-            return False, {"error": "Error limpiando datos"}
-        
-        # Calcular totales
-        if not self.calcular_totales():
-            return False, {"error": "Error calculando totales"}
-        
-        # Obtener resumen
-        resumen = self.obtener_resumen()
-        
-        self.logger.info("Archivo procesado exitosamente")
-        return True, resumen
+        try:
+            # Cargar archivo
+            self.logger.info("Iniciando procesamiento de archivo")
+            if not self.cargar_archivo(ruta_archivo):
+                return False, {"error": "No se pudo cargar el archivo"}
+            
+            # Validar estructura
+            self.logger.info("Validando estructura del archivo")
+            if not self.validar_estructura():
+                return False, {"error": "Estructura de archivo inválida", "errores": self.errores_validacion}
+            
+            # Limpiar datos
+            self.logger.info("Limpiando datos")
+            try:
+                self.df_procesado = self.limpiar_datos(self.df_original)
+                if self.df_procesado is None or len(self.df_procesado) == 0:
+                    return False, {"error": "Error limpiando datos: resultado vacío"}
+            except Exception as e:
+                self.logger.error(f"Error en limpiar_datos: {str(e)}")
+                return False, {"error": f"Error limpiando datos: {str(e)}"}
+            
+            # Calcular totales
+            self.logger.info("Calculando totales")
+            if not self.calcular_totales():
+                return False, {"error": "Error calculando totales"}
+            
+            # Obtener resumen
+            self.logger.info("Generando resumen")
+            resumen = self.obtener_resumen()
+            
+            self.logger.info("Archivo procesado exitosamente")
+            return True, resumen
+            
+        except Exception as e:
+            self.logger.error(f"Error en procesar_archivo_completo: {str(e)}")
+            return False, {"error": f"Error inesperado: {str(e)}"}

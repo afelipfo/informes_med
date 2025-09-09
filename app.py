@@ -32,6 +32,13 @@ def convertir_tipos_numpy(obj):
         return obj.tolist()
     elif isinstance(obj, (np.bool_, bool)):
         return bool(obj)
+    elif hasattr(obj, 'dtype') and 'bool' in str(obj.dtype):
+        return bool(obj)
+    elif hasattr(obj, 'item'):  # Para tipos escalares de numpy/pandas
+        try:
+            return obj.item()
+        except (ValueError, AttributeError):
+            return str(obj)
     elif pd.isna(obj):
         return None
     else:
