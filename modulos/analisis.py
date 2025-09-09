@@ -7,18 +7,136 @@ procesados de Survey123 y generar estadísticas e insights.
 """
 
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-import plotly.express as px
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-from datetime import datetime, timedelta
+from datetime import datetime
 import warnings
-from typing import Dict, List, Tuple, Any
+from typing import Dict, Any
 import os
 
 warnings.filterwarnings('ignore')
+
+
+class AnalizadorDatos:
+    """
+    Clase para análisis básico de datos de Survey123
+    """
+    
+    def __init__(self):
+        """Inicializa el analizador"""
+        pass
+    
+    def calcular_estadisticas_basicas(self, datos: pd.DataFrame) -> Dict[str, Any]:
+        """
+        Calcula estadísticas básicas de los datos
+        
+        Args:
+            datos: DataFrame con los datos
+            
+        Returns:
+            Dict con estadísticas básicas
+        """
+        try:
+            estadisticas = {
+                'total_intervenciones': len(datos),
+                'trabajadores_unicos': datos['trabajador'].nunique() if 'trabajador' in datos.columns else 0,
+                'intervenciones_por_estado': {},
+                'promedio_horas': 0
+            }
+            
+            if 'estado_obr' in datos.columns:
+                estadisticas['intervenciones_por_estado'] = datos['estado_obr'].value_counts().to_dict()
+            
+            if 'total_hora' in datos.columns:
+                estadisticas['promedio_horas'] = datos['total_hora'].mean()
+            
+            return estadisticas
+        except Exception as e:
+            return {
+                'total_intervenciones': 0,
+                'trabajadores_unicos': 0,
+                'intervenciones_por_estado': {},
+                'promedio_horas': 0,
+                'error': str(e)
+            }
+    
+    def analizar_productividad(self, datos: pd.DataFrame) -> Dict[str, Any]:
+        """
+        Analiza la productividad de los trabajadores
+        
+        Args:
+            datos: DataFrame con los datos
+            
+        Returns:
+            Dict con análisis de productividad
+        """
+        try:
+            productividad = {
+                'horas_promedio': 0,
+                'trabajador_mas_productivo': 'N/A',
+                'cuadrilla_mas_activa': 'N/A'
+            }
+            
+            if 'total_hora' in datos.columns:
+                productividad['horas_promedio'] = datos['total_hora'].mean()
+            
+            if 'trabajador' in datos.columns and 'total_hora' in datos.columns:
+                horas_por_trabajador = datos.groupby('trabajador')['total_hora'].sum()
+                if len(horas_por_trabajador) > 0:
+                    productividad['trabajador_mas_productivo'] = horas_por_trabajador.idxmax()
+            
+            if 'num_cuadri' in datos.columns:
+                intervenciones_por_cuadrilla = datos['num_cuadri'].value_counts()
+                if len(intervenciones_por_cuadrilla) > 0:
+                    productividad['cuadrilla_mas_activa'] = intervenciones_por_cuadrilla.idxmax()
+            
+            return productividad
+        except Exception as e:
+            return {
+                'horas_promedio': 0,
+                'trabajador_mas_productivo': 'N/A',
+                'cuadrilla_mas_activa': 'N/A',
+                'error': str(e)
+            }
+    
+    def generar_tendencias(self, datos: pd.DataFrame) -> Dict[str, Any]:
+        """
+        Genera análisis de tendencias temporales
+        
+        Args:
+            datos: DataFrame con los datos
+            
+        Returns:
+            Dict con tendencias
+        """
+        try:
+            tendencias = {
+                'intervenciones_por_dia': pd.Series(dtype='int64'),
+                'tendencia_semanal': {}
+            }
+            
+            if 'fecha_dilig' in datos.columns:
+                # Convertir fechas si no están en formato datetime
+                if not pd.api.types.is_datetime64_any_dtype(datos['fecha_dilig']):
+                    datos['fecha_dilig'] = pd.to_datetime(datos['fecha_dilig'], errors='coerce')
+                
+                datos_con_fecha = datos.dropna(subset=['fecha_dilig'])
+                if len(datos_con_fecha) > 0:
+                    tendencias['intervenciones_por_dia'] = datos_con_fecha.groupby(
+                        datos_con_fecha['fecha_dilig'].dt.date
+                    ).size()
+                    
+                    # Tendencia semanal
+                    datos_con_fecha['dia_semana'] = datos_con_fecha['fecha_dilig'].dt.day_name()
+                    tendencias['tendencia_semanal'] = datos_con_fecha['dia_semana'].value_counts().to_dict()
+            
+            return tendencias
+        except Exception as e:
+            return {
+                'intervenciones_por_dia': pd.Series(dtype='int64'),
+                'tendencia_semanal': {},
+                'error': str(e)
+            }
 
 class AnalisisSurvey123:
     """

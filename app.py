@@ -8,6 +8,7 @@ import pandas as pd
 import numpy as np
 import os
 import logging
+import time
 from datetime import datetime
 from werkzeug.utils import secure_filename
 import json
@@ -40,6 +41,9 @@ def crear_aplicacion():
     """Factory pattern para crear la aplicación Flask"""
     app = Flask(__name__)
     app.config.from_object(Config)
+    
+    # Marcar tiempo de inicio para uptime
+    app.start_time = time.time()
     
     # Configurar logging
     if not app.debug:
@@ -159,8 +163,44 @@ def crear_aplicacion():
         if app.datos_cargados is None:
             return jsonify({'error': 'No hay datos cargados'}), 400
         
-        estadisticas = app.repositorio.obtener_estadisticas()
-        return jsonify(convertir_tipos_numpy(estadisticas))
+        try:
+            from modulos.analisis import AnalizadorDatos
+            analizador = AnalizadorDatos()
+            estadisticas = analizador.calcular_estadisticas_basicas(app.datos_cargados)
+            return jsonify(convertir_tipos_numpy(estadisticas))
+        except Exception as e:
+            app.logger.error(f"Error obteniendo estadísticas: {str(e)}")
+            return jsonify({'error': 'Error obteniendo estadísticas', 'detalles': str(e)}), 500
+
+    @app.route('/api/productividad')
+    def api_productividad():
+        """API para obtener análisis de productividad"""
+        if app.datos_cargados is None:
+            return jsonify({'error': 'No hay datos cargados'}), 400
+        
+        try:
+            from modulos.analisis import AnalizadorDatos
+            analizador = AnalizadorDatos()
+            productividad = analizador.analizar_productividad(app.datos_cargados)
+            return jsonify(convertir_tipos_numpy(productividad))
+        except Exception as e:
+            app.logger.error(f"Error obteniendo productividad: {str(e)}")
+            return jsonify({'error': 'Error obteniendo productividad', 'detalles': str(e)}), 500
+
+    @app.route('/api/tendencias')
+    def api_tendencias():
+        """API para obtener análisis de tendencias"""
+        if app.datos_cargados is None:
+            return jsonify({'error': 'No hay datos cargados'}), 400
+        
+        try:
+            from modulos.analisis import AnalizadorDatos
+            analizador = AnalizadorDatos()
+            tendencias = analizador.generar_tendencias(app.datos_cargados)
+            return jsonify(convertir_tipos_numpy(tendencias))
+        except Exception as e:
+            app.logger.error(f"Error obteniendo tendencias: {str(e)}")
+            return jsonify({'error': 'Error obteniendo tendencias', 'detalles': str(e)}), 500
 
     @app.route('/api/datos_grafico/<tipo>')
     def api_datos_grafico(tipo):
@@ -417,6 +457,132 @@ def crear_aplicacion():
     def favicon():
         """Ruta para el favicon"""
         return '', 204
+    
+    @app.route('/health')
+    def health_check():
+        """Endpoint de health check para monitoreo"""
+        try:
+            import psutil
+            
+            # Verificar estado de la aplicación
+            health_status = {
+                'status': 'healthy',
+                'timestamp': datetime.now().isoformat(),
+                'version': '1.0.0',
+                'uptime_seconds': time.time() - app.start_time if hasattr(app, 'start_time') else 0
+            }
+            
+            # Verificar memoria
+            memoria = psutil.virtual_memory()
+            health_status['memory'] = {
+                'used_percent': round(memoria.percent, 2),
+                'available_gb': round(memoria.available / (1024**3), 2)
+            }
+            
+            # Verificar espacio en disco
+            upload_folder = app.config.get('UPLOAD_FOLDER', '.')
+            if os.path.exists(upload_folder):
+                if os.name == 'nt':  # Windows
+                    import shutil
+                    free_space_gb = shutil.disk_usage(upload_folder).free / (1024**3)
+                else:  # Unix/Linux
+                    stats = os.statvfs(upload_folder)
+                    free_space_gb = (stats.f_bavail * stats.f_frsize) / (1024**3)
+                
+                health_status['disk'] = {
+                    'free_space_gb': round(free_space_gb, 2)
+                }
+            
+            # Verificar directorios críticos
+            directorios_criticos = [
+                app.config.get('UPLOAD_FOLDER'),
+                app.config.get('PROCESSED_FOLDER'),
+                app.config.get('REPORTS_FOLDER')
+            ]
+            
+            health_status['directories'] = {}
+            for directorio in directorios_criticos:
+                if directorio:
+                    health_status['directories'][os.path.basename(directorio)] = {
+                        'exists': os.path.exists(directorio),
+                        'writable': os.access(directorio, os.W_OK) if os.path.exists(directorio) else False
+                    }
+            
+            # Verificar si hay datos cargados
+            health_status['data'] = {
+                'loaded': app.datos_cargados is not None,
+                'records_count': len(app.datos_cargados) if app.datos_cargados is not None else 0
+            }
+            
+            # Determinar estado general
+            memoria_ok = memoria.percent < 90
+            disco_ok = health_status.get('disk', {}).get('free_space_gb', 0) > 0.5
+            directorios_ok = all(
+                dir_info.get('exists', False) and dir_info.get('writable', False)
+                for dir_info in health_status['directories'].values()
+            )
+            
+            if memoria_ok and disco_ok and directorios_ok:
+                health_status['status'] = 'healthy'
+                status_code = 200
+            else:
+                health_status['status'] = 'degraded'
+                health_status['issues'] = []
+                if not memoria_ok:
+                    health_status['issues'].append('High memory usage')
+                if not disco_ok:
+                    health_status['issues'].append('Low disk space')
+                if not directorios_ok:
+                    health_status['issues'].append('Directory access issues')
+                status_code = 200  # Mantenemos 200 pero marcamos como degraded
+            
+            return jsonify(health_status), status_code
+            
+        except Exception as e:
+            app.logger.error(f"Error en health check: {str(e)}")
+            return jsonify({
+                'status': 'unhealthy',
+                'timestamp': datetime.now().isoformat(),
+                'error': str(e)
+            }), 503
+    
+    @app.route('/metrics')
+    def metrics():
+        """Endpoint de métricas para monitoreo avanzado"""
+        try:
+            import psutil
+            
+            proceso = psutil.Process()
+            
+            metrics_data = {
+                'timestamp': datetime.now().isoformat(),
+                'system': {
+                    'cpu_percent': psutil.cpu_percent(interval=1),
+                    'memory_percent': psutil.virtual_memory().percent,
+                    'disk_usage_percent': psutil.disk_usage('/').percent if os.name == 'posix' else psutil.disk_usage('C:\\').percent
+                },
+                'process': {
+                    'memory_mb': round(proceso.memory_info().rss / 1024 / 1024, 2),
+                    'cpu_percent': proceso.cpu_percent(),
+                    'threads': proceso.num_threads(),
+                    'open_files': len(proceso.open_files())
+                },
+                'application': {
+                    'data_loaded': app.datos_cargados is not None,
+                    'records_count': len(app.datos_cargados) if app.datos_cargados is not None else 0,
+                    'config_valid': all([
+                        app.config.get('SECRET_KEY'),
+                        app.config.get('UPLOAD_FOLDER'),
+                        app.config.get('REQUIRED_COLUMNS')
+                    ])
+                }
+            }
+            
+            return jsonify(metrics_data)
+            
+        except Exception as e:
+            app.logger.error(f"Error obteniendo métricas: {str(e)}")
+            return jsonify({'error': 'Error obteniendo métricas', 'details': str(e)}), 500
 
     @app.errorhandler(404)
     def not_found_error(error):
@@ -445,3 +611,6 @@ if __name__ == '__main__':
     print("=" * 60)
     
     app.run(host='0.0.0.0', port=5000, debug=False)
+else:
+    # Para importación directa
+    app = crear_aplicacion()

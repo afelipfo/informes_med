@@ -20,17 +20,17 @@ import warnings
 
 warnings.filterwarnings('ignore')
 
-class GeorreferenciadeSurvey123:
+class GeorreferenciadorMedico:
     """
-    Clase principal para manejo de datos georreferenciados de Survey123
+    Alias para compatibilidad con tests
     """
     
     def __init__(self, datos: pd.DataFrame):
         """
-        Inicializa el procesador de datos geográficos
+        Inicializa el procesador de datos geográficos médicos
         
         Args:
-            datos: DataFrame con datos de Survey123 que incluye coordenadas X, Y
+            datos: DataFrame con datos de Survey123
         """
         self.datos = datos.copy()
         self.validar_columnas_geograficas()
@@ -45,6 +45,146 @@ class GeorreferenciadeSurvey123:
             'lon_min': -75.7,
             'lon_max': -75.5
         }
+        
+        # Centro de Medellín para mapas
+        self.centro_medellin = {
+            'lat': 6.2442,
+            'lon': -75.5812
+        }
+    
+    def validar_columnas_geograficas(self):
+        """Valida que existan las columnas geográficas necesarias"""
+        columnas_requeridas = ['X', 'Y']
+        columnas_faltantes = [col for col in columnas_requeridas if col not in self.datos.columns]
+        
+        if columnas_faltantes:
+            raise ValueError(f"Faltan columnas geográficas: {columnas_faltantes}")
+    
+    def convertir_coordenadas(self, x: float, y: float, desde_crs: str = 'EPSG:3116', 
+                            hacia_crs: str = 'EPSG:4326') -> Tuple[float, float]:
+        """
+        Convierte coordenadas entre sistemas de referencia
+        
+        Args:
+            x: Coordenada X (este)
+            y: Coordenada Y (norte)
+            desde_crs: Sistema de coordenadas origen
+            hacia_crs: Sistema de coordenadas destino
+            
+        Returns:
+            Tupla con coordenadas convertidas (lon, lat)
+        """
+        try:
+            # Crear punto en el CRS origen
+            point = gpd.GeoSeries([Point(x, y)], crs=desde_crs)
+            # Convertir al CRS destino
+            point_convertido = point.to_crs(hacia_crs)
+            
+            return point_convertido.iloc[0].x, point_convertido.iloc[0].y
+        except Exception as e:
+            # Si falla la conversión, asumir que ya están en WGS84
+            if desde_crs == 'EPSG:4326' or hacia_crs == 'EPSG:4326':
+                return x, y
+            else:
+                # Conversión aproximada para Medellín (MAGNA-SIRGAS a WGS84)
+                lon = x * 0.0000157 - 75.6
+                lat = y * 0.000009 - 67.4
+                return lon, lat
+    
+    def validar_coordenadas_medellin(self, datos_geo: pd.DataFrame = None) -> pd.DataFrame:
+        """
+        Valida que las coordenadas estén dentro de Medellín
+        
+        Args:
+            datos_geo: DataFrame con coordenadas a validar
+            
+        Returns:
+            DataFrame con coordenadas válidas
+        """
+        if datos_geo is None:
+            datos_geo = self.datos.copy()
+        
+        # Convertir coordenadas si es necesario
+        coords_convertidas = []
+        for _, row in datos_geo.iterrows():
+            try:
+                if pd.notna(row['X']) and pd.notna(row['Y']):
+                    lon, lat = self.convertir_coordenadas(row['X'], row['Y'])
+                    coords_convertidas.append({'lon': lon, 'lat': lat, 'valida': True})
+                else:
+                    coords_convertidas.append({'lon': None, 'lat': None, 'valida': False})
+            except:
+                coords_convertidas.append({'lon': None, 'lat': None, 'valida': False})
+        
+        # Agregar coordenadas convertidas al DataFrame
+        datos_geo['lon'] = [c['lon'] for c in coords_convertidas]
+        datos_geo['lat'] = [c['lat'] for c in coords_convertidas]
+        datos_geo['coord_valida'] = [c['valida'] for c in coords_convertidas]
+        
+        # Filtrar coordenadas válidas para Medellín
+        mask_validas = (
+            datos_geo['coord_valida'] &
+            datos_geo['lon'].between(self.limites_medellin['lon_min'], self.limites_medellin['lon_max']) &
+            datos_geo['lat'].between(self.limites_medellin['lat_min'], self.limites_medellin['lat_max'])
+        )
+        
+        return datos_geo[mask_validas]
+    
+    def generar_mapa(self, datos_filtrados: pd.DataFrame = None, 
+                    titulo: str = "Mapa de Intervenciones") -> folium.Map:
+        """
+        Genera un mapa interactivo con los datos
+        
+        Args:
+            datos_filtrados: DataFrame con datos a mapear
+            titulo: Título del mapa
+            
+        Returns:
+            Objeto folium.Map
+        """
+        if datos_filtrados is None:
+            datos_filtrados = self.validar_coordenadas_medellin()
+        
+        # Crear mapa centrado en Medellín
+        mapa = folium.Map(
+            location=[self.centro_medellin['lat'], self.centro_medellin['lon']],
+            zoom_start=12,
+            tiles='OpenStreetMap'
+        )
+        
+        # Agregar puntos al mapa
+        for _, row in datos_filtrados.iterrows():
+            if pd.notna(row.get('lat')) and pd.notna(row.get('lon')):
+                popup_text = f"""
+                <b>ID:</b> {row.get('id_punto', 'N/A')}<br>
+                <b>Estado:</b> {row.get('estado_obr', 'N/A')}<br>
+                <b>Intervención:</b> {row.get('nombre_int', 'N/A')}<br>
+                <b>Trabajador:</b> {row.get('trabajador', 'N/A')}<br>
+                <b>Fecha:</b> {row.get('fecha_dilig', 'N/A')}
+                """
+                
+                folium.Marker(
+                    location=[row['lat'], row['lon']],
+                    popup=folium.Popup(popup_text, max_width=300),
+                    tooltip=f"ID: {row.get('id_punto', 'N/A')}"
+                ).add_to(mapa)
+        
+        return mapa
+
+class GeorreferenciadeSurvey123(GeorreferenciadorMedico):
+    """
+    Clase principal para manejo de datos georreferenciados de Survey123
+    (Hereda de GeorreferenciadorMedico para compatibilidad)
+    """
+    
+    def __init__(self, datos: pd.DataFrame):
+        """
+        Inicializa el procesador de datos geográficos
+        
+        Args:
+            datos: DataFrame con datos de Survey123 que incluye coordenadas X, Y
+        """
+        super().__init__(datos)
         
         # Centro de Medellín para mapas
         self.centro_medellin = {

@@ -110,6 +110,111 @@ class ProcesadorSurvey123:
         self.logger.info("Estructura del archivo validada correctamente")
         return True
     
+    def procesar_archivo(self, ruta_archivo: str) -> pd.DataFrame:
+        """
+        Procesa un archivo Excel completo
+        
+        Args:
+            ruta_archivo: Ruta al archivo Excel
+            
+        Returns:
+            DataFrame procesado o None si hay error
+        """
+        try:
+            # Cargar archivo
+            if not self.cargar_archivo(ruta_archivo):
+                return None
+            
+            # Validar estructura
+            validacion = self.validar_estructura(self.df_original)
+            if not validacion['valido']:
+                self.logger.error(f"Validación falló: {validacion['errores']}")
+                return None
+            
+            # Limpiar datos
+            datos_limpios = self.limpiar_datos(self.df_original)
+            
+            return datos_limpios
+            
+        except Exception as e:
+            self.logger.error(f"Error procesando archivo: {str(e)}")
+            return None
+    
+    def validar_estructura(self, datos: pd.DataFrame) -> dict:
+        """
+        Valida la estructura de un DataFrame
+        
+        Args:
+            datos: DataFrame a validar
+            
+        Returns:
+            Dict con resultado de validación
+        """
+        errores = []
+        
+        # Validar columnas esenciales
+        columnas_requeridas = getattr(self.config, 'REQUIRED_COLUMNS', [
+            'Shape', 'X', 'Y', 'start', 'id_punto', 'estado_obr', 
+            'fecha_dilig', 'nombre_int', 'num_cuadri', 'trabajador'
+        ])
+        
+        columnas_faltantes = []
+        for col in columnas_requeridas:
+            if col not in datos.columns:
+                columnas_faltantes.append(col)
+        
+        if columnas_faltantes:
+            errores.append(f"Columnas faltantes: {columnas_faltantes}")
+        
+        # Validar que hay datos
+        if datos.empty:
+            errores.append("El archivo está vacío")
+        
+        return {
+            'valido': len(errores) == 0,
+            'errores': errores
+        }
+    
+    def limpiar_datos(self, datos: pd.DataFrame) -> pd.DataFrame:
+        """
+        Limpia y procesa los datos
+        
+        Args:
+            datos: DataFrame original
+            
+        Returns:
+            DataFrame limpio
+        """
+        try:
+            # Crear copia para procesamiento
+            df_limpio = datos.copy()
+            
+            # Eliminar filas con coordenadas faltantes
+            df_limpio = df_limpio.dropna(subset=['X', 'Y'])
+            
+            # Convertir tipos de datos
+            if 'X' in df_limpio.columns:
+                df_limpio['X'] = pd.to_numeric(df_limpio['X'], errors='coerce')
+            if 'Y' in df_limpio.columns:
+                df_limpio['Y'] = pd.to_numeric(df_limpio['Y'], errors='coerce')
+            
+            # Eliminar filas con coordenadas inválidas
+            df_limpio = df_limpio.dropna(subset=['X', 'Y'])
+            
+            # Limpiar campos de texto
+            campos_texto = ['estado_obr', 'nombre_int', 'trabajador']
+            for campo in campos_texto:
+                if campo in df_limpio.columns:
+                    df_limpio[campo] = df_limpio[campo].fillna('').astype(str)
+                    df_limpio = df_limpio[df_limpio[campo].str.strip() != '']
+            
+            self.logger.info(f"Datos limpiados: {len(datos)} -> {len(df_limpio)} registros")
+            return df_limpio
+            
+        except Exception as e:
+            self.logger.error(f"Error limpiando datos: {str(e)}")
+            return datos.copy()
+    
     def _validar_coordenadas(self) -> bool:
         """Validar que las coordenadas X, Y sean válidas"""
         try:
@@ -136,55 +241,6 @@ class ProcesadorSurvey123:
             
         except Exception as e:
             self.errores_validacion.append(f"Error validando coordenadas: {str(e)}")
-            return False
-    
-    def limpiar_datos(self) -> bool:
-        """
-        Limpiar y convertir tipos de datos
-        
-        Returns:
-            bool: True si la limpieza fue exitosa
-        """
-        try:
-            # Crear copia para procesamiento
-            self.df_procesado = self.df_original.copy()
-            
-            # Convertir fechas
-            if 'fecha_dilig' in self.df_procesado.columns:
-                self.df_procesado['fecha_dilig'] = pd.to_datetime(
-                    self.df_procesado['fecha_dilig'], errors='coerce'
-                )
-            
-            if 'start' in self.df_procesado.columns:
-                self.df_procesado['start'] = pd.to_datetime(
-                    self.df_procesado['start'], errors='coerce'
-                )
-            
-            # Convertir columnas numéricas
-            columnas_numericas = [
-                'num_cuadri', 'trabajador', 'cant_ayuda', 'cant_ofici', 
-                'cant_opera', 'cant_auxil', 'cant_otros', 'num_total_', 
-                'total_hora', 'horas_retr', 'horas_mini', 'horas_volq', 
-                'horas_comp', 'horas_otra'
-            ]
-            
-            for col in columnas_numericas:
-                if col in self.df_procesado.columns:
-                    self.df_procesado[col] = pd.to_numeric(
-                        self.df_procesado[col], errors='coerce'
-                    ).fillna(0)
-            
-            # Limpiar textos
-            columnas_texto = ['id_punto', 'nombre_int', 'maquinaria']
-            for col in columnas_texto:
-                if col in self.df_procesado.columns:
-                    self.df_procesado[col] = self.df_procesado[col].astype(str).str.strip()
-            
-            self.logger.info("Datos limpiados exitosamente")
-            return True
-            
-        except Exception as e:
-            self.logger.error(f"Error limpiando datos: {str(e)}")
             return False
     
     def calcular_totales(self) -> bool:
