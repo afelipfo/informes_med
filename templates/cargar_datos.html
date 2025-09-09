@@ -16,13 +16,13 @@
 {% block content %}
 <div class="container my-5">
     <!-- Encabezado -->
-    <div class="row mb-4">
+    <div class="row mb-5">
         <div class="col-12 text-center">
-            <h2 class="display-5 fw-bold">
-                <i class="fas fa-upload text-primary"></i>
+            <h2 class="page-title">
+                <i class="fas fa-upload me-3"></i>
                 Cargar Archivo Survey123
             </h2>
-            <p class="lead text-muted">
+            <p class="page-subtitle">
                 Suba su archivo Excel de Survey123 para procesamiento automático
             </p>
         </div>
@@ -31,39 +31,63 @@
     <!-- Área de carga de archivos -->
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <div class="card shadow-lg">
-                <div class="card-header bg-primary text-white">
+            <div class="upload-card">
+                <div class="upload-card-header">
                     <h5 class="mb-0">
-                        <i class="fas fa-file-excel"></i>
+                        <i class="fas fa-file-excel me-2"></i>
                         Seleccionar Archivo
                     </h5>
                 </div>
-                <div class="card-body">
-                    <form id="uploadForm" enctype="multipart/form-data">
-                        <div class="mb-4">
-                            <label for="archivo" class="form-label">
-                                <strong>Archivo Survey123 (.xlsx o .xls)</strong>
-                            </label>
-                            <input 
-                                type="file" 
-                                class="form-control form-control-lg" 
-                                id="archivo" 
-                                name="archivo" 
-                                accept=".xlsx,.xls"
-                                required>
-                            <div class="form-text">
-                                <i class="fas fa-info-circle"></i>
-                                Tamaño máximo: 16MB. Formatos permitidos: .xlsx, .xls
+                <div class="upload-card-body">
+                    <!-- Zona de drag and drop -->
+                    <div class="dropzone" id="dropzone">
+                        <div class="dropzone-content">
+                            <div class="dropzone-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <h4 class="dropzone-title">Arrastra tu archivo aquí</h4>
+                            <p class="dropzone-subtitle">o haz clic para seleccionar</p>
+                            <div class="dropzone-info">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Tamaño máximo: 16MB • Formatos: .xlsx, .xls
+                                </small>
                             </div>
                         </div>
+                        <input 
+                            type="file" 
+                            class="dropzone-input" 
+                            id="archivo" 
+                            name="archivo" 
+                            accept=".xlsx,.xls"
+                            aria-label="Seleccionar archivo Excel con datos Survey123"
+                            required>
+                    </div>
 
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
-                            <button type="submit" class="btn btn-primary btn-lg" id="btnProcesar">
-                                <i class="fas fa-cogs"></i>
+                    <!-- Archivo seleccionado -->
+                    <div class="selected-file selected-file-hidden" id="selectedFile">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-file-excel text-success me-2 fs-4"></i>
+                                <div>
+                                    <div class="file-name fw-semibold"></div>
+                                    <div class="file-size text-muted"></div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeFile()" title="Eliminar archivo seleccionado">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <form id="uploadForm" enctype="multipart/form-data" class="upload-form-hidden">
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg px-4" id="btnProcesar">
+                                <i class="fas fa-cogs me-2"></i>
                                 Procesar Archivo
                             </button>
-                            <button type="button" class="btn btn-outline-secondary btn-lg" onclick="limpiarFormulario()">
-                                <i class="fas fa-trash"></i>
+                            <button type="button" class="btn btn-outline-secondary btn-lg px-4" onclick="limpiarFormulario()">
+                                <i class="fas fa-trash me-2"></i>
                                 Limpiar
                             </button>
                         </div>
@@ -81,65 +105,144 @@
                     <div id="resultadosProcesamiento" class="mt-4 hidden">
                         <!-- Los resultados se cargarán aquí dinámicamente -->
                     </div>
+
+                    <!-- Card de éxito con KPIs y acciones -->
+                    <div id="successCard" class="success-card mt-4">
+                        <div class="success-header">
+                            <div class="d-flex align-items-center">
+                                <div class="success-icon me-3">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-1">¡Archivo procesado exitosamente!</h5>
+                                    <p class="mb-0 text-muted">Los datos han sido validados y están listos para análisis</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="success-body">
+                            <!-- KPIs del archivo procesado -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-3">
+                                    <div class="success-kpi">
+                                        <div class="kpi-number" id="totalRegistros">0</div>
+                                        <div class="kpi-label">Registros</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="success-kpi">
+                                        <div class="kpi-number" id="totalColumnas">0</div>
+                                        <div class="kpi-label">Columnas</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="success-kpi">
+                                        <div class="kpi-number" id="registrosValidos">0</div>
+                                        <div class="kpi-label">Válidos</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="success-kpi">
+                                        <div class="kpi-number" id="tamanioArchivo">0</div>
+                                        <div class="kpi-label">Tamaño</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Botones de acción -->
+                            <div class="success-actions">
+                                <div class="row g-2">
+                                    <div class="col-md-4">
+                                        <a href="{{ url_for('ver_analisis') }}" class="btn btn-primary w-100">
+                                            <i class="fas fa-chart-line me-2"></i>Ver Análisis
+                                        </a>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <a href="{{ url_for('generar_informe') }}" class="btn btn-outline-primary w-100">
+                                            <i class="fas fa-file-pdf me-2"></i>Generar Informe
+                                        </a>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <a href="{{ url_for('mapa_intervenciones') }}" class="btn btn-outline-primary w-100">
+                                            <i class="fas fa-map-marked-alt me-2"></i>Ver Mapa
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Información sobre el formato esperado -->
+    <!-- Panel colapsable con información del formato esperado -->
     <div class="row mt-5">
         <div class="col-12">
-            <div class="card bg-light">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-info-circle text-info"></i>
-                        Información del Formato Esperado
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6><i class="fas fa-check-circle text-success"></i> Columnas Requeridas:</h6>
-                            <ul class="list-group list-group-flush">
-                                <li class="list-group-item border-0 bg-transparent">
-                                    <strong>Shape:</strong> Tipo de geometría
-                                </li>
-                                <li class="list-group-item border-0 bg-transparent">
-                                    <strong>X, Y:</strong> Coordenadas geográficas
-                                </li>
-                                <li class="list-group-item border-0 bg-transparent">
-                                    <strong>id_punto:</strong> Identificador único
-                                </li>
-                                <li class="list-group-item border-0 bg-transparent">
-                                    <strong>estado_obr:</strong> Estado de la obra
-                                </li>
-                                <li class="list-group-item border-0 bg-transparent">
-                                    <strong>fecha_dilig:</strong> Fecha de diligenciamiento
-                                </li>
-                            </ul>
+            <div class="accordion custom-accordion" id="formatInfoAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingFormat">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFormat" aria-expanded="false" aria-controls="collapseFormat">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Información del Formato Esperado
+                        </button>
+                    </h2>
+                    <div id="collapseFormat" class="accordion-collapse collapse" aria-labelledby="headingFormat" data-bs-parent="#formatInfoAccordion">
+                        <div class="accordion-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-check-circle text-success"></i> Columnas Requeridas:</h6>
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2">
+                                            <i class="fas fa-caret-right text-primary me-1"></i>
+                                            <strong>Shape:</strong> Tipo de geometría
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-caret-right text-primary me-1"></i>
+                                            <strong>X, Y:</strong> Coordenadas geográficas
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-caret-right text-primary me-1"></i>
+                                            <strong>id_punto:</strong> Identificador único
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-caret-right text-primary me-1"></i>
+                                            <strong>estado_obr:</strong> Estado de la obra
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-caret-right text-primary me-1"></i>
+                                            <strong>fecha_dilig:</strong> Fecha de diligenciamiento
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-users text-primary"></i> Datos de Personal:</h6>
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2">
+                                            <i class="fas fa-caret-right text-primary me-1"></i>
+                                            <strong>num_cuadri:</strong> Número de cuadrillas
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-caret-right text-primary me-1"></i>
+                                            <strong>cant_ayuda, cant_ofici:</strong> Tipos de trabajadores
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-caret-right text-primary me-1"></i>
+                                            <strong>total_hora:</strong> Horas trabajadas
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-caret-right text-primary me-1"></i>
+                                            <strong>horas_retr, horas_mini:</strong> Horas de maquinaria
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-warning mt-3" role="alert">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Importante:</strong> Asegúrese de que el archivo proviene directamente de Survey123 y mantiene la estructura original de columnas.
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <h6><i class="fas fa-users text-primary"></i> Datos de Personal:</h6>
-                            <ul class="list-group list-group-flush">
-                                <li class="list-group-item border-0 bg-transparent">
-                                    <strong>num_cuadri:</strong> Número de cuadrillas
-                                </li>
-                                <li class="list-group-item border-0 bg-transparent">
-                                    <strong>cant_ayuda, cant_ofici:</strong> Tipos de trabajadores
-                                </li>
-                                <li class="list-group-item border-0 bg-transparent">
-                                    <strong>total_hora:</strong> Horas trabajadas
-                                </li>
-                                <li class="list-group-item border-0 bg-transparent">
-                                    <strong>horas_retr, horas_mini:</strong> Horas de maquinaria
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    
-                    <div class="alert alert-warning mt-3" role="alert">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <strong>Importante:</strong> Asegúrese de que el archivo proviene directamente de Survey123 y mantiene la estructura original de columnas.
                     </div>
                 </div>
             </div>
@@ -149,19 +252,39 @@
     <!-- Historial de archivos procesados -->
     <div class="row mt-5">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header">
+            <div class="history-card">
+                <div class="history-header">
                     <h5 class="mb-0">
-                        <i class="fas fa-history text-secondary"></i>
-                        Archivos Procesados Recientemente
+                        <i class="fas fa-history me-2"></i>Historial de Archivos Procesados
                     </h5>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="limpiarHistorial()">
+                        <i class="fas fa-trash me-1"></i>Limpiar Historial
+                    </button>
                 </div>
-                <div class="card-body">
+                <div class="history-body">
                     <div id="historialArchivos">
-                        <p class="text-muted text-center">
-                            <i class="fas fa-inbox"></i>
-                            No hay archivos procesados en esta sesión
-                        </p>
+                        <!-- Tabla de historial -->
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="tablaHistorial">
+                                <thead>
+                                    <tr>
+                                        <th><i class="fas fa-file me-1"></i>Nombre</th>
+                                        <th><i class="fas fa-calendar me-1"></i>Fecha</th>
+                                        <th><i class="fas fa-list-ol me-1"></i>Registros</th>
+                                        <th><i class="fas fa-database me-1"></i>Tamaño</th>
+                                        <th><i class="fas fa-cogs me-1"></i>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="historialBody">
+                                    <tr class="empty-state">
+                                        <td colspan="5" class="text-center text-muted py-4">
+                                            <i class="fas fa-inbox fa-2x mb-2"></i>
+                                            <p class="mb-0">No hay archivos procesados en esta sesión</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -221,7 +344,12 @@ document.getElementById('uploadForm').addEventListener('submit', function(e) {
         
         if (data.exito) {
             mostrarResultadosExito(data);
-            agregarAlHistorial(data);
+            
+            // Agregar al historial
+            const nombreArchivo = archivo.name;
+            const tamaño = formatFileSize(archivo.size);
+            const registros = data.resumen?.archivo_procesado?.filas || 0;
+            agregarAlHistorial(nombreArchivo, registros, tamaño);
         } else {
             mostrarResultadosError(data);
         }
@@ -331,35 +459,6 @@ function mostrarResultadosError(data) {
     resultadosDiv.scrollIntoView({ behavior: 'smooth' });
 }
 
-function agregarAlHistorial(data) {
-    const historialDiv = document.getElementById('historialArchivos');
-    const fecha = new Date().toLocaleString('es-CO');
-    const resumen = data.resumen || {};
-    const archivo = resumen.archivo_procesado || {};
-    
-    const item = `
-        <div class="d-flex justify-content-between align-items-center border-bottom py-2">
-            <div>
-                <strong>${data.archivo_original || 'Archivo procesado'}</strong>
-                <br>
-                <small class="text-muted">
-                    <i class="fas fa-clock"></i> ${fecha} - 
-                    ${archivo.filas || 0} registros
-                </small>
-            </div>
-            <span class="badge bg-success">
-                <i class="fas fa-check"></i> Procesado
-            </span>
-        </div>
-    `;
-    
-    if (historialDiv.innerHTML.includes('No hay archivos')) {
-        historialDiv.innerHTML = item;
-    } else {
-        historialDiv.insertAdjacentHTML('afterbegin', item);
-    }
-}
-
 function limpiarFormulario() {
     document.getElementById('uploadForm').reset();
     hideElement('resultadosProcesamiento');
@@ -369,7 +468,12 @@ function limpiarFormulario() {
 
 // Drag and drop functionality
 const fileInput = document.getElementById('archivo');
-const dropZone = document.querySelector('.card-body');
+const dropZone = document.getElementById('dropzone');
+
+// Click en dropzone para abrir selector de archivos
+dropZone.addEventListener('click', function() {
+    fileInput.click();
+});
 
 ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
     dropZone.addEventListener(eventName, preventDefaults, false);
@@ -389,11 +493,19 @@ function preventDefaults(e) {
 });
 
 function highlight(e) {
-    dropZone.classList.add('border-primary', 'bg-light');
+    dropZone.classList.add('dropzone-active');
 }
 
 function unhighlight(e) {
-    dropZone.classList.remove('border-primary', 'bg-light');
+    dropZone.classList.remove('dropzone-active');
+}
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
 dropZone.addEventListener('drop', handleDrop, false);
@@ -411,14 +523,133 @@ function handleDrop(e) {
     }
 }
 
-// Mostrar nombre del archivo seleccionado
+// Mostrar archivo seleccionado
 fileInput.addEventListener('change', function() {
     if (this.files && this.files[0]) {
-        const fileName = this.files[0].name;
-        const fileSize = (this.files[0].size / 1024 / 1024).toFixed(2);
+        const file = this.files[0];
+        const fileName = file.name;
+        const fileSize = (file.size / 1024 / 1024).toFixed(2);
         
-        mostrarAlerta(`Archivo seleccionado: ${fileName} (${fileSize} MB)`, 'info');
+        // Mostrar información del archivo
+        document.querySelector('#selectedFile .file-name').textContent = fileName;
+        document.querySelector('#selectedFile .file-size').textContent = `${fileSize} MB`;
+        
+        // Mostrar elementos
+        document.getElementById('selectedFile').classList.remove('selected-file-hidden');
+        document.getElementById('uploadForm').classList.remove('upload-form-hidden');
+        
+        // Ocultar dropzone
+        dropZone.style.display = 'none';
+        
+        mostrarAlerta(`Archivo seleccionado: ${fileName} (${fileSize} MB)`, 'success');
     }
+});
+
+// Función para eliminar archivo seleccionado
+function removeFile() {
+    fileInput.value = '';
+    document.getElementById('selectedFile').classList.add('selected-file-hidden');
+    document.getElementById('uploadForm').classList.add('upload-form-hidden');
+    dropZone.style.display = 'block';
+}
+
+// Funciones del historial de archivos
+function agregarAlHistorial(nombreArchivo, registros, tamaño) {
+    const historial = JSON.parse(localStorage.getItem('historialArchivos')) || [];
+    
+    const nuevoArchivo = {
+        id: Date.now(),
+        nombre: nombreArchivo,
+        fecha: new Date().toLocaleString('es-ES'),
+        registros: registros || 0,
+        tamaño: tamaño || '0 MB',
+        timestamp: Date.now()
+    };
+    
+    historial.unshift(nuevoArchivo);
+    
+    // Mantener solo los últimos 10 archivos
+    if (historial.length > 10) {
+        historial.splice(10);
+    }
+    
+    localStorage.setItem('historialArchivos', JSON.stringify(historial));
+    actualizarTablaHistorial();
+}
+
+function actualizarTablaHistorial() {
+    const historial = JSON.parse(localStorage.getItem('historialArchivos')) || [];
+    const tbody = document.getElementById('historialBody');
+    
+    if (historial.length === 0) {
+        tbody.innerHTML = `
+            <tr class="empty-state">
+                <td colspan="5" class="text-center text-muted py-4">
+                    <i class="fas fa-inbox fa-2x mb-2"></i>
+                    <p class="mb-0">No hay archivos procesados en esta sesión</p>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    tbody.innerHTML = historial.map(archivo => `
+        <tr>
+            <td>
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-file-excel text-success me-2"></i>
+                    <span class="fw-semibold">${archivo.nombre}</span>
+                </div>
+            </td>
+            <td class="text-muted">${archivo.fecha}</td>
+            <td>
+                <span class="badge bg-primary">${archivo.registros}</span>
+            </td>
+            <td class="text-muted">${archivo.tamaño}</td>
+            <td>
+                <div class="btn-group" role="group">
+                    <button class="btn btn-outline-primary btn-sm" onclick="verDetalles(${archivo.id})" title="Ver detalles">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm" onclick="eliminarDelHistorial(${archivo.id})" title="Eliminar">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function eliminarDelHistorial(id) {
+    if (confirm('¿Está seguro de que desea eliminar este archivo del historial?')) {
+        const historial = JSON.parse(localStorage.getItem('historialArchivos')) || [];
+        const nuevoHistorial = historial.filter(archivo => archivo.id !== id);
+        localStorage.setItem('historialArchivos', JSON.stringify(nuevoHistorial));
+        actualizarTablaHistorial();
+        mostrarAlerta('Archivo eliminado del historial', 'success');
+    }
+}
+
+function verDetalles(id) {
+    const historial = JSON.parse(localStorage.getItem('historialArchivos')) || [];
+    const archivo = historial.find(a => a.id === id);
+    
+    if (archivo) {
+        mostrarAlerta(`Archivo: ${archivo.nombre} - Procesado el ${archivo.fecha} con ${archivo.registros} registros`, 'info');
+    }
+}
+
+function limpiarHistorial() {
+    if (confirm('¿Está seguro de que desea limpiar todo el historial?')) {
+        localStorage.removeItem('historialArchivos');
+        actualizarTablaHistorial();
+        mostrarAlerta('Historial limpiado correctamente', 'success');
+    }
+}
+
+// Cargar historial al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    actualizarTablaHistorial();
 });
 </script>
 {% endblock %}

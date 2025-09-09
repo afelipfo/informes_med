@@ -5,80 +5,164 @@
 {% block content %}
 <div class="container-fluid py-4">
     <!-- Encabezado -->
-    <div class="row mb-4">
+    <div class="row mb-5">
         <div class="col-12">
-            <h2 class="display-5 fw-bold">
-                <i class="fas fa-chart-line text-primary"></i>
+            <h2 class="page-title">
+                <i class="fas fa-chart-line me-3"></i>
                 Análisis de Datos Survey123
             </h2>
-            <p class="lead text-muted">
+            <p class="page-subtitle">
                 Visualización y análisis estadístico de las intervenciones urbanas
             </p>
         </div>
     </div>
 
     {% if estadisticas %}
-    <!-- Métricas generales -->
+    <!-- Sistema de tabs -->
     <div class="row mb-4">
+        <div class="col-12">
+            <ul class="nav nav-tabs analysis-tabs" id="analysisTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="resumen-tab" data-bs-toggle="tab" data-bs-target="#resumen" type="button" role="tab" aria-controls="resumen" aria-selected="true">
+                        <i class="fas fa-chart-pie me-2"></i>Resumen General
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="recursos-tab" data-bs-toggle="tab" data-bs-target="#recursos" type="button" role="tab" aria-controls="recursos" aria-selected="false">
+                        <i class="fas fa-users me-2"></i>Recursos Humanos
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="maquinaria-tab" data-bs-toggle="tab" data-bs-target="#maquinaria" type="button" role="tab" aria-controls="maquinaria" aria-selected="false">
+                        <i class="fas fa-cogs me-2"></i>Maquinaria y Equipos
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="actividades-tab" data-bs-toggle="tab" data-bs-target="#actividades" type="button" role="tab" aria-controls="actividades" aria-selected="false">
+                        <i class="fas fa-tasks me-2"></i>Actividades
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Contenido de tabs -->
+    <div class="tab-content" id="analysisTabsContent">
+        <!-- Tab 1: Resumen General -->
+        <div class="tab-pane fade show active" id="resumen" role="tabpanel" aria-labelledby="resumen-tab">
+            <div class="row">
+                <!-- Panel de filtros lateral -->
+                <div class="col-lg-3">
+                    <div class="filters-panel">
+                        <div class="filters-header">
+                            <h5 class="filters-title">
+                                <i class="fas fa-filter me-2"></i>Filtros
+                            </h5>
+                        </div>
+                        <div class="filters-body">
+                            <!-- Filtro por estado -->
+                            <div class="filter-group">
+                                <label for="filterEstado" class="form-label">Estado de Obra</label>
+                                <select class="form-select" id="filterEstado" multiple>
+                                    <option value="">Todos los estados</option>
+                                    {% if estadisticas.metricas_generales and estadisticas.metricas_generales.estados_obra %}
+                                        {% for estado in estadisticas.metricas_generales.estados_obra.keys() %}
+                                        <option value="{{ estado }}">{{ estado }}</option>
+                                        {% endfor %}
+                                    {% endif %}
+                                </select>
+                            </div>
+
+                            <!-- Filtro por comuna -->
+                            <div class="filter-group">
+                                <label for="filterComuna" class="form-label">Comuna</label>
+                                <select class="form-select" id="filterComuna" multiple>
+                                    <option value="">Todas las comunas</option>
+                                    <!-- Las opciones se cargarán dinámicamente -->
+                                </select>
+                            </div>
+
+                            <!-- Filtro por rango de fechas -->
+                            <div class="filter-group">
+                                <label class="form-label">Rango de Fechas</label>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <input type="date" class="form-control" id="fechaInicio" placeholder="Fecha inicio">
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="date" class="form-control" id="fechaFin" placeholder="Fecha fin">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Botones de filtro -->
+                            <div class="filter-actions">
+                                <button class="btn btn-primary btn-sm w-100 mb-2" onclick="aplicarFiltros()">
+                                    <i class="fas fa-search me-1"></i>Aplicar Filtros
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm w-100" onclick="limpiarFiltros()">
+                                    <i class="fas fa-times me-1"></i>Limpiar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contenido principal -->
+                <div class="col-lg-9">
+                    <!-- Métricas generales -->
+    <div class="row mb-5">
         <div class="col-md-3 mb-3">
-            <div class="card bg-primary text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h5 class="card-title">Total Intervenciones</h5>
-                            <h3 class="mb-0">{{ estadisticas.metadata.total_registros if estadisticas.metadata else 0 }}</h3>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-map-marker-alt fa-2x"></i>
-                        </div>
+            <div class="kpi-card kpi-primary">
+                <div class="kpi-content">
+                    <div class="kpi-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div class="kpi-data">
+                        <h3 class="kpi-number">{{ estadisticas.metadata.total_registros if estadisticas.metadata else 0 }}</h3>
+                        <p class="kpi-label">Total Intervenciones</p>
                     </div>
                 </div>
             </div>
         </div>
         
         <div class="col-md-3 mb-3">
-            <div class="card bg-success text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h5 class="card-title">Total Trabajadores</h5>
-                            <h3 class="mb-0">{{ estadisticas.recursos_humanos.total_trabajadores if estadisticas.recursos_humanos and estadisticas.recursos_humanos.total_trabajadores else 0 }}</h3>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-users fa-2x"></i>
-                        </div>
+            <div class="kpi-card kpi-success">
+                <div class="kpi-content">
+                    <div class="kpi-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="kpi-data">
+                        <h3 class="kpi-number">{{ estadisticas.recursos_humanos.total_trabajadores if estadisticas.recursos_humanos and estadisticas.recursos_humanos.total_trabajadores else 0 }}</h3>
+                        <p class="kpi-label">Total Trabajadores</p>
                     </div>
                 </div>
             </div>
         </div>
         
         <div class="col-md-3 mb-3">
-            <div class="card bg-info text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h5 class="card-title">Total Horas</h5>
-                            <h3 class="mb-0">{{ "%.0f"|format(estadisticas.recursos_humanos.total_horas_trabajadas) if estadisticas.recursos_humanos and estadisticas.recursos_humanos.total_horas_trabajadas else 0 }}</h3>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-clock fa-2x"></i>
-                        </div>
+            <div class="kpi-card kpi-info">
+                <div class="kpi-content">
+                    <div class="kpi-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="kpi-data">
+                        <h3 class="kpi-number">{{ "%.0f"|format(estadisticas.recursos_humanos.total_horas_trabajadas) if estadisticas.recursos_humanos and estadisticas.recursos_humanos.total_horas_trabajadas else 0 }}</h3>
+                        <p class="kpi-label">Total Horas</p>
                     </div>
                 </div>
             </div>
         </div>
         
         <div class="col-md-3 mb-3">
-            <div class="card bg-warning text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h5 class="card-title">Horas Maquinaria</h5>
-                            <h3 class="mb-0">{{ "%.0f"|format(estadisticas.maquinaria.total_horas_maquinaria) if estadisticas.maquinaria and estadisticas.maquinaria.total_horas_maquinaria else 0 }}</h3>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-cogs fa-2x"></i>
-                        </div>
+            <div class="kpi-card kpi-warning">
+                <div class="kpi-content">
+                    <div class="kpi-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <div class="kpi-data">
+                        <h3 class="kpi-number">{{ "%.0f"|format(estadisticas.maquinaria.total_horas_maquinaria) if estadisticas.maquinaria and estadisticas.maquinaria.total_horas_maquinaria else 0 }}</h3>
+                        <p class="kpi-label">Horas Maquinaria</p>
                     </div>
                 </div>
             </div>
@@ -264,10 +348,22 @@
                     {% if estadisticas.actividades_construccion.resumen_por_grupo %}
                     <div class="row">
                         <div class="col-md-12">
-                            <h6>Análisis Detallado por Grupos de Actividades</h6>
-                            <p class="text-muted mb-3">
-                                Se analizan 13 grupos principales que cubren todas las 78 variables del Survey123
-                            </p>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h6>Análisis Detallado por Grupos de Actividades</h6>
+                                    <p class="text-muted mb-0">
+                                        Se analizan 13 grupos principales que cubren todas las 78 variables del Survey123
+                                    </p>
+                                </div>
+                                <div class="accordion-controls">
+                                    <button class="btn btn-outline-primary btn-sm me-2" onclick="expandirTodos()">
+                                        <i class="fas fa-expand-alt me-1"></i>Expandir Todos
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="colapsarTodos()">
+                                        <i class="fas fa-compress-alt me-1"></i>Colapsar Todos
+                                    </button>
+                                </div>
+                            </div>
                             
                             <!-- Accordion para mostrar cada grupo -->
                             <div class="accordion" id="gruposActividades">
@@ -524,6 +620,24 @@ document.addEventListener('DOMContentLoaded', function() {
     {% endif %}
     
     {% endif %}
+
+    // Funciones para controlar el accordion
+    function expandirTodos() {
+        const acordeones = document.querySelectorAll('#gruposActividades .accordion-collapse');
+        acordeones.forEach(acordeon => {
+            const bsCollapse = new bootstrap.Collapse(acordeon, {show: true});
+        });
+    }
+
+    function colapsarTodos() {
+        const acordeones = document.querySelectorAll('#gruposActividades .accordion-collapse.show');
+        acordeones.forEach(acordeon => {
+            const bsCollapse = bootstrap.Collapse.getInstance(acordeon);
+            if (bsCollapse) {
+                bsCollapse.hide();
+            }
+        });
+    }
 });
 
 // Configurar barras de progreso

@@ -13,118 +13,215 @@
 {% block content %}
 <div class="container my-5">
     <!-- Encabezado -->
-    <div class="row mb-4">
+    <div class="row mb-5">
         <div class="col-12 text-center">
-            <h2 class="display-5 fw-bold">
-                <i class="fas fa-file-pdf text-primary"></i>
+            <h2 class="page-title">
+                <i class="fas fa-file-pdf me-3"></i>
                 Generar Informes Automatizados
             </h2>
-            <p class="lead text-muted">
+            <p class="page-subtitle">
                 Genere informes personalizados en PDF y Excel basados en los datos Survey123
             </p>
         </div>
     </div>
 
-    <!-- Tipos de informes disponibles -->
-    <div class="row mb-4">
-        <div class="col-lg-4 mb-3">
-            <div class="card h-100 border-primary">
-                <div class="card-header bg-primary text-white">
+    <!-- Selector de tipo de informe -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-lg-10">
+            <div class="report-selector-card">
+                <div class="report-selector-header">
                     <h5 class="mb-0">
-                        <i class="fas fa-chart-bar"></i>
-                        Informe Estadístico
+                        <i class="fas fa-clipboard-list me-2"></i>Seleccionar Tipo de Informe
                     </h5>
                 </div>
-                <div class="card-body">
-                    <p class="card-text">
-                        Resumen estadístico completo con gráficos, distribuciones y métricas clave de las intervenciones urbanas.
-                    </p>
-                    <ul class="list-unstyled">
-                        <li><i class="fas fa-check text-success"></i> Estadísticas generales</li>
-                        <li><i class="fas fa-check text-success"></i> Gráficos interactivos</li>
-                        <li><i class="fas fa-check text-success"></i> Distribución por comunas</li>
-                        <li><i class="fas fa-check text-success"></i> Análisis temporal</li>
-                    </ul>
-                </div>
-                <div class="card-footer">
-                    <button class="btn btn-primary w-100" onclick="generarInforme('estadistico')">
-                        <i class="fas fa-download"></i>
-                        Generar PDF
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-4 mb-3">
-            <div class="card h-100 border-success">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-table"></i>
-                        Informe Detallado
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <p class="card-text">
-                        Listado detallado de todas las intervenciones con información completa y filtros personalizables.
-                    </p>
-                    <ul class="list-unstyled">
-                        <li><i class="fas fa-check text-success"></i> Datos completos</li>
-                        <li><i class="fas fa-check text-success"></i> Filtros por estado</li>
-                        <li><i class="fas fa-check text-success"></i> Información geográfica</li>
-                        <li><i class="fas fa-check text-success"></i> Exportable a Excel</li>
-                    </ul>
-                </div>
-                <div class="card-footer">
-                    <div class="btn-group w-100" role="group">
-                        <button class="btn btn-success" onclick="generarInforme('detallado', 'pdf')">
-                            <i class="fas fa-file-pdf"></i> PDF
-                        </button>
-                        <button class="btn btn-outline-success" onclick="generarInforme('detallado', 'excel')">
-                            <i class="fas fa-file-excel"></i> Excel
-                        </button>
+                <div class="report-selector-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <input type="radio" class="btn-check" name="tipoInforme" id="estadistico" value="estadistico" checked>
+                            <label class="btn btn-outline-primary w-100 h-100 report-option" for="estadistico">
+                                <div class="report-icon">
+                                    <i class="fas fa-chart-bar"></i>
+                                </div>
+                                <h6 class="report-title">Informe Estadístico</h6>
+                                <p class="report-description">Resumen estadístico con gráficos y métricas clave</p>
+                            </label>
+                        </div>
+                        <div class="col-md-4">
+                            <input type="radio" class="btn-check" name="tipoInforme" id="detallado" value="detallado">
+                            <label class="btn btn-outline-primary w-100 h-100 report-option" for="detallado">
+                                <div class="report-icon">
+                                    <i class="fas fa-list-alt"></i>
+                                </div>
+                                <h6 class="report-title">Informe Detallado</h6>
+                                <p class="report-description">Análisis completo con datos desagregados por actividad</p>
+                            </label>
+                        </div>
+                        <div class="col-md-4">
+                            <input type="radio" class="btn-check" name="tipoInforme" id="ejecutivo" value="ejecutivo">
+                            <label class="btn btn-outline-primary w-100 h-100 report-option" for="ejecutivo">
+                                <div class="report-icon">
+                                    <i class="fas fa-briefcase"></i>
+                                </div>
+                                <h6 class="report-title">Resumen Ejecutivo</h6>
+                                <p class="report-description">Resumen conciso para toma de decisiones gerenciales</p>
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <div class="col-lg-4 mb-3">
-            <div class="card h-100 border-info">
-                <div class="card-header bg-info text-white">
+    </div>
+    <!-- Configuración de informes -->
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="config-card">
+                <div class="config-header">
                     <h5 class="mb-0">
-                        <i class="fas fa-map"></i>
-                        Informe Geográfico
+                        <i class="fas fa-cog me-2"></i>Configuración del Informe
                     </h5>
                 </div>
-                <div class="card-body">
-                    <p class="card-text">
-                        Análisis geoespacial con mapas interactivos y distribución territorial de las intervenciones.
-                    </p>
-                    <ul class="list-unstyled">
-                        <li><i class="fas fa-check text-success"></i> Mapas interactivos</li>
-                        <li><i class="fas fa-check text-success"></i> Análisis por comunas</li>
-                        <li><i class="fas fa-check text-success"></i> Densidad territorial</li>
-                        <li><i class="fas fa-check text-success"></i> Coordenadas precisas</li>
-                    </ul>
-                </div>
-                <div class="card-footer">
-                    <button class="btn btn-info w-100" onclick="generarInforme('geografico')">
-                        <i class="fas fa-download"></i>
-                        Generar PDF
-                    </button>
+                <div class="config-body">
+                    <div class="row g-4">
+                        <!-- Filtros por estado -->
+                        <div class="col-md-6">
+                            <div class="config-group">
+                                <label class="form-label">Estados de Obra</label>
+                                <select class="form-select" id="configEstados" multiple>
+                                    <option value="terminado">Terminado</option>
+                                    <option value="en_ejecucion">En Ejecución</option>
+                                    <option value="pendiente">Pendiente</option>
+                                    <option value="suspendido">Suspendido</option>
+                                </select>
+                                <div class="form-text">Seleccione uno o más estados</div>
+                            </div>
+                        </div>
+
+                        <!-- Filtros por comuna -->
+                        <div class="col-md-6">
+                            <div class="config-group">
+                                <label class="form-label">Comunas</label>
+                                <select class="form-select" id="configComunas" multiple>
+                                    <option value="">Cargar desde datos...</option>
+                                </select>
+                                <div class="form-text">Seleccione las comunas a incluir</div>
+                            </div>
+                        </div>
+
+                        <!-- Rango de fechas -->
+                        <div class="col-md-6">
+                            <div class="config-group">
+                                <label class="form-label">Rango de Fechas</label>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <input type="date" class="form-control" id="configFechaInicio">
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="date" class="form-control" id="configFechaFin">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Secciones a incluir -->
+                        <div class="col-md-6">
+                            <div class="config-group">
+                                <label class="form-label">Secciones a Incluir</label>
+                                <div class="config-checkboxes">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="incluirEstadisticas" checked>
+                                        <label class="form-check-label" for="incluirEstadisticas">
+                                            <i class="fas fa-chart-pie me-1"></i>Estadísticas
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="incluirGraficos" checked>
+                                        <label class="form-check-label" for="incluirGraficos">
+                                            <i class="fas fa-chart-bar me-1"></i>Gráficos
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="incluirMapas">
+                                        <label class="form-check-label" for="incluirMapas">
+                                            <i class="fas fa-map me-1"></i>Mapas
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="incluirTablas" checked>
+                                        <label class="form-check-label" for="incluirTablas">
+                                            <i class="fas fa-table me-1"></i>Tablas Detalladas
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones de generación -->
+                    <div class="config-actions">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <button class="btn btn-primary btn-lg w-100" onclick="generarInforme('pdf')">
+                                    <i class="fas fa-file-pdf me-2"></i>Generar PDF
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <button class="btn btn-outline-primary btn-lg w-100" onclick="generarInforme('excel')">
+                                    <i class="fas fa-file-excel me-2"></i>Generar Excel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Configuración de informes -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
+    <!-- Historial de Informes -->
+    <div class="row justify-content-center mt-5">
+        <div class="col-lg-10">
+            <div class="history-card">
+                <div class="history-header">
                     <h5 class="mb-0">
-                        <i class="fas fa-cog text-primary"></i>
-                        Configuración de Informes
+                        <i class="fas fa-history me-2"></i>Historial de Informes
                     </h5>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="limpiarHistorial()">
+                        <i class="fas fa-trash me-1"></i>Limpiar Historial
+                    </button>
+                </div>
+                <div class="history-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Tipo de Informe</th>
+                                    <th>Formato</th>
+                                    <th>Fecha de Generación</th>
+                                    <th>Configuración</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historialTableBody">
+                                <!-- Contenido dinámico -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="historialEmpty" class="text-center py-4 history-empty">
+                        <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                        <h6 class="text-muted">No hay informes generados</h6>
+                        <p class="text-muted">Los informes que genere aparecerán aquí para su gestión</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loader durante generación -->
+    <div class="text-center mt-4 loading-spinner" id="loadingInforme">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Generando informe...</span>
+        </div>
+        <p class="mt-2">Generando informe, por favor espere...</p>
+    </div>
                 </div>
                 <div class="card-body">
                     <form id="configuracionInformes">
@@ -433,40 +530,59 @@ function agregarAlHistorial(tipo, formato) {
 // Cargar y mostrar historial
 function cargarHistorial() {
     const historial = JSON.parse(localStorage.getItem('historialInformes') || '[]');
-    mostrarHistorial(historial);
-}
-
-// Mostrar historial en la interfaz
-function mostrarHistorial(historial) {
-    const container = document.getElementById('historialInformes');
+    const tableBody = document.getElementById('historialTableBody');
+    const emptyState = document.getElementById('historialEmpty');
     
     if (historial.length === 0) {
-        container.innerHTML = `
-            <div class="text-center text-muted py-3">
-                <i class="fas fa-file fa-2x mb-2"></i>
-                <p>No hay informes generados aún</p>
-                <small>Los informes generados aparecerán aquí para su descarga</small>
-            </div>
-        `;
+        tableBody.innerHTML = '';
+        emptyState.style.display = 'block';
         return;
     }
     
+    emptyState.style.display = 'none';
+    
     const html = historial.map(item => `
-        <div class="d-flex justify-content-between align-items-center border-bottom py-2">
-            <div>
-                <strong>${capitalizar(item.tipo)}</strong> 
-                <span class="badge bg-secondary">${item.formato.toUpperCase()}</span>
-                <br>
+        <tr>
+            <td>
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-file-${item.formato === 'pdf' ? 'pdf text-danger' : 'excel text-success'} me-2"></i>
+                    <span class="fw-semibold">${capitalizar(item.tipo)}</span>
+                </div>
+            </td>
+            <td>
+                <span class="badge bg-${item.formato === 'pdf' ? 'danger' : 'success'}">${item.formato.toUpperCase()}</span>
+            </td>
+            <td>
                 <small class="text-muted">${item.fecha}</small>
-            </div>
-            <button class="btn btn-outline-primary btn-sm" onclick="redescargar(${item.id})">
-                <i class="fas fa-download"></i>
-                Descargar
-            </button>
-        </div>
+            </td>
+            <td>
+                <small class="text-muted">${item.configuracion || 'Configuración por defecto'}</small>
+            </td>
+            <td>
+                <div class="btn-group" role="group">
+                    <button class="btn btn-outline-primary btn-sm" onclick="redescargar(${item.id})" title="Descargar">
+                        <i class="fas fa-download"></i>
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm" onclick="eliminarInforme(${item.id})" title="Eliminar">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
     `).join('');
     
-    container.innerHTML = html;
+    tableBody.innerHTML = html;
+}
+
+// Función para eliminar un informe específico
+function eliminarInforme(id) {
+    if (confirm('¿Está seguro de que desea eliminar este informe?')) {
+        const historial = JSON.parse(localStorage.getItem('historialInformes') || '[]');
+        const nuevoHistorial = historial.filter(item => item.id !== id);
+        localStorage.setItem('historialInformes', JSON.stringify(nuevoHistorial));
+        cargarHistorial();
+        mostrarAlerta('Informe eliminado correctamente', 'success');
+    }
 }
 
 // Funciones auxiliares
