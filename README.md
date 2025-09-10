@@ -1,157 +1,373 @@
-# Sistema de Análisis Survey123
+# Sistema de Informes Survey123
 
 ## Secretaría de Infraestructura Física de Medellín
 
-### 🏛️ Descripción del Proyecto
+## Descripción del Proyecto
 
-Sistema web desarrollado en Python/Flask para el procesamiento automatizado de datos Survey123 de obras de infraestructura física en Medellín. Proporciona análisis estadístico, visualización geográfica, generación de reportes y capacidades de inteligencia artificial para optimizar la gestión de proyectos de infraestructura municipal.
+Sistema web desarrollado en Python Flask para el procesamiento automatizado de datos Survey123 de obras de infraestructura física urbana. Implementa algoritmos de procesamiento de lenguaje natural (NLP) e inteligencia artificial para generar informes dinámicos e insights contextuales a partir de datos de campo.
 
-### Características Principales
+## Arquitectura del Sistema
 
-- **Ingesta Automática**: Procesamiento de archivos Excel de Survey123
-- **Validación de Datos**: Verificación de integridad y consistencia
-- **Cálculos Automáticos**: KPIs y totales calculados automáticamente
-- **Georreferenciación**: Mapas interactivos de intervenciones
-- **Informes Automáticos**: Generación en PDF, Word y Excel
-- **Inteligencia Artificial**: Análisis de textos y predicciones
-- **Interfaz Web**: Panel intuitivo en español
+### Stack Tecnológico
 
-### Estructura del Proyecto
+**Backend:**
 
+- Python 3.8+ con Flask 3.0.0
+- Pandas 2.2.0 para análisis de datos
+- ReportLab 4.0.9 para generación de PDF
+- Scikit-learn 1.4.0, NLTK 3.8.1, spaCy 3.7.2 para NLP
+- Folium 0.15.1 para visualización geográfica
+
+**Frontend:**
+
+- Bootstrap 5.x para diseño responsivo
+- JavaScript vanilla para interacciones
+- Folium para mapas interactivos
+- Chart.js para visualizaciones estadísticas
+
+**Procesamiento de Datos:**
+
+- OpenPyXL 3.1.2 para archivos Excel
+- NumPy 1.26.3 para cálculos numéricos
+- GeoPandas 0.14.3 para datos geoespaciales
+
+## Funcionalidades Principales
+
+### 1. Ingesta y Validación de Datos
+
+- Procesamiento automático de archivos Excel Survey123 (78 variables)
+- Validación de estructura e integridad de datos
+- Limpieza automática y normalización de valores
+- Cálculo automático de totales y métricas derivadas
+
+### 2. Motor de Inteligencia Artificial
+
+- **AnalizadorInteligenteSurvey123**: Análisis semántico de las 78 variables
+- Detección automática de patrones y correlaciones estadísticas
+- Generación dinámica de insights contextuales
+- Análisis de sentimientos y procesamiento de texto libre
+- Recomendaciones inteligentes basadas en datos
+
+### 3. Generación de Informes
+
+**Informes Tradicionales:**
+
+- Informe Estadístico: Análisis descriptivo básico
+- Informe Detallado: Análisis completo con datos desagregados
+- Resumen Ejecutivo: Síntesis para toma de decisiones
+
+**Informes Inteligentes (IA):**
+
+- Análisis dinámico de patrones temporales
+- Correlaciones automáticas entre variables
+- Insights contextuales generados por NLP
+- Recomendaciones estratégicas personalizadas
+- Narrativa adaptativa según los datos
+
+### 4. Visualización Geoespacial
+
+- Mapas interactivos de intervenciones por comuna
+- Clustering automático de actividades por densidad
+- Filtros dinámicos por estado, fecha y tipo de obra
+- Exportación de mapas en formato imagen
+
+### 5. Dashboard de Análisis
+
+- Métricas en tiempo real de recursos humanos
+- Análisis de productividad por equipos de trabajo
+- Distribución de maquinaria y equipos
+- Cobertura territorial y concentración geográfica
+
+## Estructura del Proyecto
+
+```tree
+informes_med/
+├── app.py                          # Aplicación principal Flask
+├── config.py                       # Configuraciones del sistema
+├── requirements.txt                # Dependencias Python
+├── install.ps1                     # Script instalación Windows
+├── install.sh                      # Script instalación Linux/Mac
+│
+├── modulos/                        # Módulos principales
+│   ├── __init__.py                 # Inicialización del paquete
+│   ├── ingesta.py                  # Procesamiento archivos Survey123
+│   ├── modelos.py                  # Modelos de datos y estructuras
+│   ├── analisis.py                 # Análisis estadístico básico
+│   ├── reportes.py                 # Generadores de reportes tradicionales
+│   ├── georreferenciacion.py       # Procesamiento geoespacial
+│   ├── inteligencia_nlp.py         # Motor de IA y análisis NLP
+│   ├── generador_inteligente.py    # Generador informes con IA
+│   ├── generadores_pdf.py          # Generadores PDF tradicionales
+│   └── generador_informes.py       # Utilidades generación informes
+│
+├── templates/                      # Plantillas HTML Jinja2
+│   ├── base.html                   # Template base con Bootstrap
+│   ├── index.html                  # Página principal
+│   ├── cargar_datos.html           # Interfaz carga de archivos
+│   ├── ver_analisis.html           # Dashboard de análisis
+│   ├── generar_informe.html        # Interfaz generación informes
+│   └── mapa_intervenciones.html    # Visualizador de mapas
+│
+├── static/                         # Recursos estáticos
+│   ├── images/                     # Imágenes del sistema
+│   │   ├── logo_alcaldia.jpg       # Logo institucional
+│   │   └── .gitkeep                # Preservar directorio
+│   └── maps/                       # Mapas generados
+│       └── .gitkeep                # Preservar directorio
+│
+├── datos/                          # Almacenamiento de datos
+│   ├── uploads/                    # Archivos cargados
+│   ├── procesados/                 # Datos procesados
+│   ├── reportes_generados/         # Informes generados
+│   └── .gitkeep                    # Preservar estructura
+│
+└── docs/                           # Documentación técnica
+    ├── instalacion.md              # Guía de instalación
+    └── documentacion_tecnica.md    # Documentación detallada
 ```
-aplicacion-web/
-│
-├── app.py                      # Aplicación principal Flask
-├── config.py                   # Configuraciones
-├── requirements.txt            # Dependencias
-├── README.md                   # Documentación
-│
-├── modulos/                    # Módulos principales
-│   ├── __init__.py
-│   ├── ingesta.py             # Carga y validación de datos
-│   ├── modelos.py             # Modelos de datos
-│   ├── analisis.py            # Procesamiento y análisis
-│   ├── reportes.py            # Generación de informes
-│   ├── georreferenciacion.py  # Mapas y coordenadas
-│   └── inteligencia_artificial.py # Módulos de IA
-│
-├── templates/                  # Plantillas HTML
-│   ├── base.html
-│   ├── index.html
-│   ├── cargar_datos.html
-│   ├── ver_analisis.html
-│   ├── generar_informe.html
-│   └── mapa_intervenciones.html
-│
-├── static/                     # Archivos estáticos
-│   ├── css/
-│   ├── js/
-│   └── img/
-│
-├── plantillas_informes/        # Plantillas de informes
-│   ├── informe_base.html
-│   ├── informe_template.docx
-│   └── estilos_pdf.css
-│
-├── datos/                      # Datos procesados
-│   ├── procesados/
-│   ├── reportes_generados/
-│   └── mapas/
-│
-├── tests/                      # Pruebas unitarias
-│   ├── test_ingesta.py
-│   ├── test_modelos.py
-│   ├── test_analisis.py
-│   └── test_reportes.py
-│
-└── docs/                       # Documentación
-    ├── instalacion.md
-    ├── uso.md
-    └── api.md
+
+## Instalación
+
+### Instalación Automática
+
+**Windows (PowerShell):**
+
+```powershell
+.\install.ps1
 ```
 
-### Instalación
+**Linux/macOS (Bash):**
 
-1. **Clonar el repositorio**:
-   ```bash
-   git clone <url-repositorio>
-   cd aplicacion-web
-   ```
+```bash
+chmod +x install.sh
+./install.sh
+```
 
-2. **Crear entorno virtual**:
-   ```bash
-   python -m venv venv
-   venv\Scripts\activate  # Windows
-   source venv/bin/activate  # Linux/Mac
-   ```
+### Instalación Manual
 
-3. **Instalar dependencias**:
-   ```bash
-   pip install -r requirements.txt
-   ```
+1. **Verificar Python 3.8+**
 
-4. **Configurar la aplicación**:
-   ```bash
-   cp config.py.example config.py
-   # Editar config.py con tus configuraciones
-   ```
+```bash
+python --version
+```
 
-5. **Ejecutar la aplicación**:
-   ```bash
-   python app.py
-   ```
+2. **Clonar repositorio**
 
-### Uso
+```bash
+git clone https://github.com/afelipfo/informes_med.git
+cd informes_med
+```
 
-1. **Acceder a la aplicación**: http://localhost:5000
-2. **Cargar archivo Survey123**: Seleccionar archivo Excel en formato Survey123
-3. **Revisar análisis**: Ver dashboard con KPIs y estadísticas
-4. **Generar informes**: Descargar en PDF, Word o Excel
-5. **Visualizar mapas**: Ver distribución geográfica de intervenciones
+3. **Crear entorno virtual**
 
-### Tecnologías Utilizadas
+```bash
+python -m venv venv
+# Windows
+venv\Scripts\activate
+# Linux/macOS
+source venv/bin/activate
+```
 
-- **Backend**: Python 3.8+, Flask
-- **Frontend**: HTML5, CSS3, JavaScript, Bootstrap
-- **Análisis de Datos**: Pandas, NumPy, SciPy
-- **Visualización**: Matplotlib, Plotly, Folium
-- **Georreferenciación**: Folium, GeoPandas
-- **Generación de Informes**: ReportLab (PDF), python-docx (Word), openpyxl (Excel)
-- **Inteligencia Artificial**: scikit-learn, NLTK, spaCy
-- **Base de Datos**: SQLite (desarrollo), PostgreSQL (producción)
+4. **Instalar dependencias**
 
-### Contribución
+```bash
+pip install -r requirements.txt
+```
 
-1. Fork el proyecto
-2. Crear rama para feature (`git checkout -b feature/nueva-funcionalidad`)
-3. Commit cambios (`git commit -m 'Agregar nueva funcionalidad'`)
-4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
-5. Crear Pull Request
+5. **Ejecutar aplicación**
 
-### Licencia
+```bash
+python app.py
+```
 
-Este proyecto está licenciado bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
+## Configuración
 
-### Contacto
+### Variables de Entorno
 
-- **Desarrollador**: Equipo de Desarrollo
-- **Organización**: Secretaría de Infraestructura Física de Medellín
-- **Email**: soporte@medellin.gov.co
+```bash
+# Opcional: Configuración avanzada
+export SECRET_KEY="tu-clave-secreta-produccion"
+export DATABASE_URL="sqlite:///survey123_prod.db"
+export LOG_LEVEL="INFO"
+```
 
-### Changelog
+### Configuración de Datos
 
-#### v1.0.0 (2025-01-XX)
-- Versión inicial
-- Ingesta de datos Survey123
-- Generación básica de informes
-- Mapas interactivos
-- Dashboard de análisis
+El sistema espera archivos Excel con 78 columnas específicas de Survey123:
 
-#### Funcionalidades Planificadas
+**Columnas Esenciales:**
 
-- [ ] Integración con API de Survey123
-- [ ] Notificaciones automáticas
-- [ ] Exportación a sistemas externos
-- [ ] App móvil para visualización
-- [ ] Dashboard ejecutivo avanzado
-- [ ] Análisis predictivo con ML
+- `Shape`, `X`, `Y`: Datos geoespaciales
+- `start`, `id_punto`: Identificadores
+- `estado_obr`: Estado de la obra
+- `fecha_dilig`: Fecha de diligenciamiento
+- `nombre_int`: Nombre de la intervención
+
+**Columnas de Recursos Humanos:**
+
+- `num_obreros`, `num_ayudan`, `num_operad`, `num_conduc`: Personal
+- `nom_obrero*`, `nom_ayudan*`: Nombres del personal
+- `total_hora`: Horas trabajadas
+
+**Columnas de Maquinaria:**
+
+- `tipo_maq_*`: Tipos de maquinaria
+- `placa_maq*`: Placas de equipos
+- `horas_maq*`: Horas de uso
+
+## Uso del Sistema
+
+### 1. Cargar Datos
+
+1. Acceder a `http://localhost:5000`
+2. Ir a "Cargar Datos"
+3. Seleccionar archivo Excel Survey123
+4. El sistema valida y procesa automáticamente
+
+### 2. Ver Análisis
+
+- Dashboard con métricas de recursos humanos
+- Análisis de maquinaria y equipos
+- Distribución de actividades por tipo
+- Cobertura territorial por comunas
+
+### 3. Generar Informes
+
+**Informes Tradicionales:**
+
+- Análisis estadístico básico
+- Tablas y gráficos descriptivos
+- Formato PDF profesional
+
+**Informes Inteligentes (IA):**
+
+- Insights dinámicos generados por NLP
+- Detección automática de patrones
+- Correlaciones estadísticas significativas
+- Recomendaciones estratégicas contextuales
+
+### 4. Visualizar Mapas
+
+- Mapas interactivos por comuna
+- Filtros por estado y fecha
+- Clustering de intervenciones
+- Exportación de mapas
+
+## API REST
+
+### Endpoints Principales
+
+```http
+GET  /                              # Página principal
+GET  /cargar_datos                  # Interfaz carga de datos
+POST /procesar_archivo              # Procesar archivo Survey123
+GET  /ver_analisis                  # Dashboard de análisis
+GET  /generar_informe               # Interfaz generación informes
+GET  /mapa_intervenciones           # Visualizador de mapas
+
+# Generación de Informes Tradicionales
+GET  /api/generar_informe_tradicional_estadistico
+GET  /api/generar_informe_tradicional_detallado  
+GET  /api/generar_informe_tradicional_ejecutivo
+
+# Generación de Informes Inteligentes (IA)
+GET  /api/generar_informe_estadistico
+GET  /api/generar_informe_detallado/pdf
+GET  /api/generar_informe_ejecutivo
+
+# APIs de Datos
+GET  /api/obtener_comunas           # Lista de comunas
+GET  /api/obtener_estados           # Estados de obra
+GET  /api/datos_mapa                # Datos para mapas
+```
+
+## Algoritmos de Inteligencia Artificial
+
+### Motor de Análisis NLP
+
+**AnalizadorInteligenteSurvey123** implementa:
+
+1. **Análisis Semántico**: Mapeo de 78 variables en categorías semánticas
+2. **Detección de Patrones**: Correlaciones estadísticas automáticas
+3. **Generación de Insights**: Narrativa dinámica basada en datos
+4. **Análisis Temporal**: Identificación de tendencias y concentraciones
+5. **Recomendaciones**: Sugerencias basadas en correlaciones encontradas
+
+### Categorías Semánticas
+
+```python
+campos_semanticos = {
+    'temporal': ['fecha_inic', 'fecha_fin_', 'hora_inici', 'hora_final'],
+    'recursos_humanos': ['nom_obrero*', 'num_obreros', 'num_ayudan', ...],
+    'maquinaria': ['tipo_maq_*', 'placa_maq*', 'horas_maq*', ...],
+    'actividades': ['actividad_', 'tipo_activ', 'descripcio', ...],
+    'ubicacion': ['barrio', 'comuna', 'direccion', 'X', 'Y', ...],
+    'estado': ['estado_obr', 'porcentaje'],
+    'observaciones': ['observacio', 'comentario', 'notas']
+}
+```
+
+## Especificaciones Técnicas
+
+### Límites del Sistema
+
+- Tamaño máximo de archivo: 16 MB
+- Formatos soportados: .xlsx, .xls
+- Registros recomendados: Hasta 10,000 por archivo
+- Variables procesadas: 78 columnas Survey123
+
+### Rendimiento
+
+- Procesamiento de 67 registros: < 2 segundos
+- Generación de informes PDF: 3-8 segundos
+- Análisis con IA: 5-15 segundos dependiendo del dataset
+
+### Compatibilidad
+
+- Python 3.8+
+- Navegadores: Chrome 90+, Firefox 88+, Edge 90+
+- Sistemas: Windows 10+, Linux, macOS 10.14+
+
+## Desarrollo y Contribución
+
+### Estructura de Módulos
+
+**modulos/ingesta.py**: Procesador principal de archivos Survey123
+**modulos/inteligencia_nlp.py**: Motor de IA y análisis NLP  
+**modulos/generador_inteligente.py**: Generador de informes con IA
+**modulos/georreferenciacion.py**: Procesamiento geoespacial
+
+### Testing
+
+```bash
+# Ejecutar tests (cuando estén disponibles)
+python -m pytest tests/
+```
+
+### Estándares de Código
+
+- PEP 8 para estilo Python
+- Docstrings detallados en funciones principales
+- Type hints en funciones públicas
+- Manejo de errores con logging
+
+## Licencia
+
+Proyecto desarrollado para la Secretaría de Infraestructura Física de Medellín.
+
+## Contacto
+
+**Organización**: Secretaría de Infraestructura Física de Medellín  
+**Soporte Técnico**: <soporte@medellin.gov.co>  
+**Repositorio**: <https://github.com/afelipfo/informes_med>
+
+## Changelog
+
+### v1.0.0 (2025-09-10)
+
+- Sistema base de procesamiento Survey123
+- Motor de inteligencia artificial con NLP
+- Generación dual de informes (tradicionales + IA)
+- Dashboard de análisis interactivo
+- Mapas geoespaciales con Folium
+- Interfaz web responsiva con Bootstrap
