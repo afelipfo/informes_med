@@ -182,15 +182,6 @@ python app.py
 
 ## Configuración
 
-### Variables de Entorno
-
-```bash
-# Opcional: Configuración avanzada
-export SECRET_KEY="tu-clave-secreta-produccion"
-export DATABASE_URL="sqlite:///survey123_prod.db"
-export LOG_LEVEL="INFO"
-```
-
 ### Configuración de Datos
 
 El sistema espera archivos Excel con 78 columnas específicas de Survey123:
@@ -357,9 +348,7 @@ Proyecto desarrollado para la Secretaría de Infraestructura Física de Medellí
 
 ## Contacto
 
-**Organización**: Secretaría de Infraestructura Física de Medellín  
-**Soporte Técnico**: <soporte@medellin.gov.co>  
-**Repositorio**: <https://github.com/afelipfo/informes_med>
+**Organización**: Secretaría de Infraestructura Física de Medellín.
 
 ## Changelog
 
