@@ -168,13 +168,20 @@ def crear_aplicacion():
             flash('No hay datos cargados. Por favor, cargue un archivo primero.', 'warning')
             return redirect(url_for('cargar_datos'))
         
-        # Calcular estadísticas para el dashboard
-        estadisticas = app.repositorio.obtener_estadisticas()
-        
-        # Convertir tipos numpy para evitar errores de serialización en templates
-        estadisticas = convertir_tipos_numpy(estadisticas)
-        
-        return render_template('ver_analisis.html', estadisticas=estadisticas)
+        try:
+            # Usar el análisis completo de Survey123
+            from modulos.analisis import AnalisisSurvey123
+            analizador = AnalisisSurvey123(app.datos_cargados)
+            estadisticas = analizador.generar_analisis_completo()
+            
+            # Convertir tipos numpy para evitar errores de serialización en templates
+            estadisticas = convertir_tipos_numpy(estadisticas)
+            
+            return render_template('ver_analisis.html', estadisticas=estadisticas)
+        except Exception as e:
+            app.logger.error(f"Error generando análisis: {str(e)}")
+            flash(f'Error generando análisis: {str(e)}', 'error')
+            return redirect(url_for('cargar_datos'))
 
     @app.route('/api/estadisticas')
     def api_estadisticas():
@@ -220,6 +227,58 @@ def crear_aplicacion():
         except Exception as e:
             app.logger.error(f"Error obteniendo tendencias: {str(e)}")
             return jsonify({'error': 'Error obteniendo tendencias', 'detalles': str(e)}), 500
+
+    @app.route('/api/aplicar_filtros', methods=['POST'])
+    def api_aplicar_filtros():
+        """API para aplicar filtros a los datos"""
+        if app.datos_cargados is None:
+            return jsonify({'error': 'No hay datos cargados'}), 400
+        
+        try:
+            filtros = request.get_json()
+            
+            # Obtener los datos base
+            datos_filtrados = app.datos_cargados.copy()
+            
+            # Aplicar filtro por estado
+            if filtros.get('estados') and len(filtros['estados']) > 0:
+                if 'estado_obr' in datos_filtrados.columns:
+                    datos_filtrados = datos_filtrados[datos_filtrados['estado_obr'].isin(filtros['estados'])]
+            
+            # Aplicar filtro por fechas
+            if filtros.get('fechaInicio') or filtros.get('fechaFin'):
+                if 'fecha_dilig' in datos_filtrados.columns:
+                    # Convertir la columna a datetime si no lo está
+                    datos_filtrados['fecha_dilig'] = pd.to_datetime(datos_filtrados['fecha_dilig'], errors='coerce')
+                    
+                    if filtros.get('fechaInicio'):
+                        fecha_inicio = pd.to_datetime(filtros['fechaInicio'])
+                        datos_filtrados = datos_filtrados[datos_filtrados['fecha_dilig'] >= fecha_inicio]
+                    
+                    if filtros.get('fechaFin'):
+                        fecha_fin = pd.to_datetime(filtros['fechaFin'])
+                        datos_filtrados = datos_filtrados[datos_filtrados['fecha_dilig'] <= fecha_fin]
+            
+            # Generar análisis con datos filtrados
+            from modulos.analisis import AnalisisSurvey123
+            analizador = AnalisisSurvey123(datos_filtrados)
+            estadisticas = analizador.generar_analisis_completo()
+            
+            # Convertir tipos numpy
+            estadisticas = convertir_tipos_numpy(estadisticas)
+            
+            # Agregar información de filtros aplicados
+            estadisticas['filtros_aplicados'] = {
+                'total_registros_originales': len(app.datos_cargados),
+                'total_registros_filtrados': len(datos_filtrados),
+                'filtros': filtros
+            }
+            
+            return jsonify(estadisticas)
+            
+        except Exception as e:
+            app.logger.error(f"Error aplicando filtros: {str(e)}")
+            return jsonify({'error': 'Error aplicando filtros', 'detalles': str(e)}), 500
 
     @app.route('/api/datos_grafico/<tipo>')
     def api_datos_grafico(tipo):
@@ -475,15 +534,27 @@ def crear_aplicacion():
             # Preparar datos para el mapa
             datos_mapa = []
             for _, fila in app.datos_cargados.iterrows():
+                # Verificar que las coordenadas sean válidas
+                try:
+                    lat = float(fila.get('Y', 0))
+                    lng = float(fila.get('X', 0))
+                    
+                    # Filtrar coordenadas inválidas (0,0 o fuera de Colombia)
+                    if lat == 0 or lng == 0 or lat < -5 or lat > 15 or lng < -85 or lng > -65:
+                        continue
+                        
+                except (ValueError, TypeError):
+                    continue
+                
                 punto = {
                     'id_punto': str(fila.get('id_punto', '')),
-                    'lat': float(fila.get('Y', 0)),
-                    'lng': float(fila.get('X', 0)),
+                    'lat': lat,
+                    'lng': lng,
                     'estado_obra': str(fila.get('estado_obr', '')),
                     'nombre_interventor': str(fila.get('nombre_int', '')),
                     'fecha_diligenciamiento': str(fila.get('fecha_dilig', '')),
-                    'total_trabajadores': int(fila.get('num_total_', 0)),
-                    'total_horas': float(fila.get('total_hora', 0))
+                    'total_trabajadores': int(fila.get('num_total_', 0)) if pd.notna(fila.get('num_total_', 0)) else 0,
+                    'total_horas': float(fila.get('total_hora', 0)) if pd.notna(fila.get('total_hora', 0)) else 0
                 }
                 datos_mapa.append(punto)
             

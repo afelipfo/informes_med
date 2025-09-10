@@ -4,10 +4,24 @@
 
 {% block head %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
 <style>
     .map-container {
-        height: 600px;
+        height: 500px;
         border-radius: 15px;
+    }
+    @media (min-width: 768px) {
+        .map-container {
+            height: 70vh;
+            min-height: 500px;
+        }
+    }
+    @media (min-width: 992px) {
+        .map-container {
+            height: 80vh;
+            min-height: 600px;
+        }
     }
     .hidden-panel {
         display: none;
@@ -87,6 +101,44 @@
     .legend-color.en-ejecucion { background-color: #007bff; }
     .legend-color.pendiente { background-color: #dc3545; }
     .legend-color.suspendida { background-color: #6c757d; }
+    
+    /* Estilos para clusters más visibles */
+    .marker-cluster-small {
+        background-color: rgba(40, 167, 69, 0.8) !important;
+        border: 3px solid white !important;
+        border-radius: 50% !important;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3) !important;
+        width: 50px !important;
+        height: 50px !important;
+        font-size: 16px !important;
+        font-weight: bold !important;
+        color: white !important;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.5) !important;
+    }
+    .marker-cluster-medium {
+        background-color: rgba(255, 193, 7, 0.8) !important;
+        border: 3px solid white !important;
+        border-radius: 50% !important;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3) !important;
+        width: 60px !important;
+        height: 60px !important;
+        font-size: 18px !important;
+        font-weight: bold !important;
+        color: white !important;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.5) !important;
+    }
+    .marker-cluster-large {
+        background-color: rgba(220, 53, 69, 0.8) !important;
+        border: 3px solid white !important;
+        border-radius: 50% !important;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3) !important;
+        width: 70px !important;
+        height: 70px !important;
+        font-size: 20px !important;
+        font-weight: bold !important;
+        color: white !important;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.5) !important;
+    }
 </style>
 {% endblock %}
 
@@ -108,10 +160,10 @@
     <!-- Layout principal: 2/3 mapa + 1/3 barra lateral -->
     <div class="row">
         <!-- Mapa principal (2/3) -->
-        <div class="col-lg-8">
+        <div class="col-lg-8 col-md-7 mb-4">
             <div class="map-panel">
                 <div class="map-header">
-                    <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap">
                         <h5 class="mb-0">
                             <i class="fas fa-globe me-2"></i>Vista Interactiva
                         </h5>
@@ -125,14 +177,14 @@
                         </div>
                     </div>
                 </div>
-                <div class="map-body">
+                <div class="map-body position-relative">
                     <div id="map" class="map-container"></div>
                 </div>
             </div>
         </div>
 
         <!-- Barra lateral (1/3) -->
-        <div class="col-lg-4">
+        <div class="col-lg-4 col-md-5">
             <!-- Estadísticas rápidas -->
             <div class="sidebar-panel">
                 <div class="sidebar-header">
@@ -167,18 +219,11 @@
                             </div>
                         </div>
                     </div>
-                    <div class="mt-3">
+                    <div class="mt-3 border-top pt-3">
                         <div class="d-flex justify-content-between">
-                            <small class="text-muted">Total Puntos:</small>
-                            <small class="fw-bold" id="totalPuntos">0</small>
+                            <small class="text-muted">Visibles en mapa:</small>
+                            <small class="fw-bold" id="puntosVisibles">{{ total_intervenciones or 0 }}</small>
                         </div>
-                        <div class="d-flex justify-content-between">
-                            <small class="text-muted">Visibles:</small>
-                            <small class="fw-bold" id="puntosVisibles">0</small>
-                        </div>
-                    </div>
-                    <div id="estadisticasDetalle" class="mt-3">
-                        <!-- Se llenará dinámicamente -->
                     </div>
                 </div>
             </div>
@@ -216,7 +261,6 @@
                         <label for="tipoVisualizacion" class="form-label">Visualización</label>
                         <select class="form-select form-select-sm" id="tipoVisualizacion" onchange="cambiarVisualizacion()">
                             <option value="markers">Marcadores</option>
-                            <option value="heatmap">Mapa de Calor</option>
                             <option value="clusters">Agrupaciones</option>
                         </select>
                     </div>
@@ -279,12 +323,14 @@
 
 {% block extra_js %}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 <script>
 // Variables globales
 let mapa;
 let grupoMarcadores;
+let grupoCluster;
 let datosPuntos = [];
-let interventoresCargados = [];
+let tipoVisualizacionActual = 'markers';
 
 // Configuración inicial
 const configMapa = {
@@ -300,17 +346,6 @@ const coloresPorEstado = {
     'En proceso': '#ffc107',
     'Pendiente': '#dc3545'
 };
-
-// Funciones auxiliares para manejo de paneles
-function showPanel(id) {
-    const element = document.getElementById(id);
-    if (element) element.classList.remove('hidden-panel');
-}
-
-function hidePanel(id) {
-    const element = document.getElementById(id);
-    if (element) element.classList.add('hidden-panel');
-}
 
 // Inicialización cuando se carga el DOM
 document.addEventListener('DOMContentLoaded', function() {
@@ -328,8 +363,39 @@ function inicializarMapa() {
         maxZoom: configMapa.maxZoom
     }).addTo(mapa);
     
-    // Grupo para los marcadores
-    grupoMarcadores = L.layerGroup().addTo(mapa);
+    // Inicializar grupos de capas
+    grupoMarcadores = L.layerGroup();
+    grupoCluster = L.markerClusterGroup({
+        chunkedLoading: true,
+        spiderfyOnMaxZoom: false,
+        showCoverageOnHover: false,
+        zoomToBoundsOnClick: true,
+        iconCreateFunction: function(cluster) {
+            var childCount = cluster.getChildCount();
+            var className = '';
+            var size = 50;
+            
+            if (childCount < 10) {
+                className = 'marker-cluster-small';
+                size = 50;
+            } else if (childCount < 50) {
+                className = 'marker-cluster-medium';
+                size = 60;
+            } else {
+                className = 'marker-cluster-large';
+                size = 70;
+            }
+            
+            return new L.DivIcon({
+                html: '<div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">' + childCount + '</div>',
+                className: className,
+                iconSize: new L.Point(size, size)
+            });
+        }
+    });
+    
+    // Agregar el grupo inicial al mapa
+    grupoMarcadores.addTo(mapa);
     
     // Eventos del mapa
     mapa.on('click', function(e) {
@@ -345,24 +411,54 @@ async function cargarDatos() {
         const response = await fetch('/api/datos_mapa');
         
         if (response.ok) {
-            datosPuntos = await response.json();
-            console.log('Datos cargados:', datosPuntos.length, 'puntos');
+            const datosCompletos = await response.json();
+            console.log('🔄 Datos recibidos del servidor:', datosCompletos.length, 'registros');
+            
+            // Filtrar puntos con coordenadas válidas
+            datosPuntos = datosCompletos.filter(p => {
+                const latValida = p.lat && !isNaN(p.lat) && p.lat !== 0 && p.lat > -5 && p.lat < 15;
+                const lngValida = p.lng && !isNaN(p.lng) && p.lng !== 0 && p.lng > -85 && p.lng < -65;
+                return latValida && lngValida;
+            });
+            
+            console.log('📍 Puntos con coordenadas válidas:', datosPuntos.length);
+            
+            // Mostrar muestra de datos
+            if (datosPuntos.length > 0) {
+                console.log('📊 Muestra de datos:');
+                datosPuntos.slice(0, 3).forEach((p, i) => {
+                    console.log(`  ${i+1}: (${p.lat}, ${p.lng}) - ${p.total_trabajadores} trabajadores`);
+                });
+            }
+            
+            if (datosPuntos.length === 0) {
+                console.warn('⚠️ No se encontraron puntos con coordenadas válidas');
+                alert('No se encontraron puntos con coordenadas válidas para mostrar en el mapa.');
+            }
         } else {
-            console.error('Error en la respuesta del servidor');
+            console.error('❌ Error en la respuesta del servidor:', response.status);
             datosPuntos = [];
+            alert('Error al cargar los datos del mapa. Verifique la conexión.');
         }
         
         // Cargar interventores únicos para el filtro
         cargarInterventores();
         
-        actualizarMapa();
-        actualizarEstadisticas();
+        // Actualizar visualización y estadísticas
+        actualizarVisualizacion();
+        
+        // Centrar mapa si hay datos
+        if (datosPuntos.length > 0) {
+            setTimeout(() => {
+                centrarMapa();
+            }, 500);
+        }
         
     } catch (error) {
-        console.error('Error cargando datos:', error);
+        console.error('❌ Error cargando datos:', error);
         datosPuntos = [];
-        actualizarMapa();
-        actualizarEstadisticas();
+        alert('Error de conexión al cargar los datos del mapa.');
+        actualizarVisualizacion();
     } finally {
         mostrarCarga(false);
     }
@@ -385,59 +481,6 @@ function cargarInterventores() {
     });
 }
 
-// Actualizar marcadores en el mapa
-function actualizarMapa() {
-    // Limpiar marcadores existentes
-    grupoMarcadores.clearLayers();
-    
-    // Aplicar filtros
-    const puntosFiltrados = aplicarFiltrosData();
-    
-    // Agregar nuevos marcadores
-    puntosFiltrados.forEach(punto => {
-        const marcador = crearMarcador(punto);
-        grupoMarcadores.addLayer(marcador);
-    });
-    
-    // Actualizar contadores
-    document.getElementById('totalPuntos').textContent = datosPuntos.length;
-    document.getElementById('puntosVisibles').textContent = puntosFiltrados.length;
-}
-
-// Crear marcador individual
-function crearMarcador(punto) {
-    const color = coloresPorEstado[punto.estado_obra] || '#6c757d';
-    
-    const marcador = L.circleMarker([punto.lat, punto.lng], {
-        radius: 8,
-        fillColor: color,
-        color: '#fff',
-        weight: 2,
-        opacity: 1,
-        fillOpacity: 0.8
-    });
-    
-    // Popup con información básica
-    const popupContent = `
-        <div style="min-width: 200px;">
-            <h6 class="mb-2">${punto.id_punto}</h6>
-            <p class="mb-1"><strong>Estado:</strong> ${punto.estado_obra}</p>
-            <p class="mb-1"><strong>Interventor:</strong> ${punto.nombre_interventor}</p>
-            <p class="mb-1"><strong>Trabajadores:</strong> ${punto.total_trabajadores}</p>
-            <p class="mb-0"><strong>Horas:</strong> ${punto.total_horas}</p>
-        </div>
-    `;
-    
-    marcador.bindPopup(popupContent);
-    
-    // Evento click para mostrar información detallada
-    marcador.on('click', function() {
-        mostrarInfoPunto(punto);
-    });
-    
-    return marcador;
-}
-
 // Aplicar filtros a los datos
 function aplicarFiltrosData() {
     const filtroEstado = document.getElementById('filtroEstado').value;
@@ -458,64 +501,322 @@ function aplicarFiltrosData() {
     });
 }
 
-// Actualizar estadísticas del panel lateral
-function actualizarEstadisticas() {
+// Actualizar visualización según el tipo seleccionado
+function actualizarVisualizacion() {
+    // Limpiar todas las capas
+    limpiarCapas();
+    
+    // Obtener puntos filtrados
     const puntosFiltrados = aplicarFiltrosData();
     
-    if (puntosFiltrados.length === 0) {
-        document.getElementById('estadisticasDetalle').innerHTML = 
-            '<small class="text-muted">No hay datos con los filtros seleccionados</small>';
-        return;
+    // Aplicar visualización según el tipo
+    switch(tipoVisualizacionActual) {
+        case 'markers':
+            mostrarMarcadores(puntosFiltrados);
+            break;
+        case 'clusters':
+            mostrarClusters(puntosFiltrados);
+            break;
     }
     
-    // Calcular estadísticas
-    const estadisticas = {
-        totalTrabajadores: puntosFiltrados.reduce((sum, p) => sum + (p.total_trabajadores || 0), 0),
-        totalHoras: puntosFiltrados.reduce((sum, p) => sum + (p.total_horas || 0), 0),
-        estadosUnicos: [...new Set(puntosFiltrados.map(p => p.estado_obra))].length,
-        interventoresUnicos: [...new Set(puntosFiltrados.map(p => p.nombre_interventor))].length
-    };
+    // Actualizar contador y estadísticas
+    document.getElementById('puntosVisibles').textContent = puntosFiltrados.length;
+    actualizarEstadisticasRapidas(puntosFiltrados);
+}
+
+// Nueva función para actualizar estadísticas rápidas
+function actualizarEstadisticasRapidas(puntosFiltrados) {
+    if (puntosFiltrados.length === 0) return;
     
-    document.getElementById('estadisticasDetalle').innerHTML = `
-        <div class="row g-2">
-            <div class="col-6">
-                <small class="text-muted">Trabajadores:</small>
-                <div class="fw-bold">${estadisticas.totalTrabajadores.toLocaleString()}</div>
+    // Calcular estadísticas por estado
+    const estadosPorTipo = {};
+    let totalTrabajadores = 0;
+    let totalHoras = 0;
+    
+    puntosFiltrados.forEach(punto => {
+        const estado = punto.estado_obra || 'Sin estado';
+        estadosPorTipo[estado] = (estadosPorTipo[estado] || 0) + 1;
+        totalTrabajadores += punto.total_trabajadores || 0;
+        totalHoras += punto.total_horas || 0;
+    });
+    
+    // Actualizar las tarjetas de estadísticas
+    const terminadas = estadosPorTipo['Terminada'] || 0;
+    const enEjecucion = (estadosPorTipo['En ejecucion'] || 0) + (estadosPorTipo['En proceso'] || 0);
+    const pendientes = estadosPorTipo['Pendiente'] || 0;
+    
+    // Actualizar DOM - buscar los elementos por su estructura
+    const statCards = document.querySelectorAll('.stat-mini .stat-value');
+    if (statCards.length >= 4) {
+        statCards[0].textContent = puntosFiltrados.length; // Total
+        statCards[1].textContent = terminadas; // Terminadas
+        statCards[2].textContent = enEjecucion; // En Ejecución
+        statCards[3].textContent = pendientes; // Pendientes
+    }
+    
+    console.log('Estadísticas actualizadas:', {
+        total: puntosFiltrados.length,
+        terminadas,
+        enEjecucion,
+        pendientes,
+        totalTrabajadores,
+        totalHoras
+    });
+}
+
+// Limpiar todas las capas del mapa
+function limpiarCapas() {
+    console.log('🧹 Limpiando capas del mapa');
+    
+    if (mapa.hasLayer(grupoMarcadores)) {
+        mapa.removeLayer(grupoMarcadores);
+        console.log('  - Removidos marcadores individuales');
+    }
+    
+    if (mapa.hasLayer(grupoCluster)) {
+        mapa.removeLayer(grupoCluster);
+        console.log('  - Removidos clusters');
+    }
+    
+    grupoMarcadores.clearLayers();
+    grupoCluster.clearLayers();
+    
+    console.log('✅ Capas limpiadas');
+}
+
+// Mostrar marcadores individuales
+function mostrarMarcadores(puntos) {
+    puntos.forEach(punto => {
+        const marcador = crearMarcador(punto);
+        grupoMarcadores.addLayer(marcador);
+    });
+    
+    mapa.addLayer(grupoMarcadores);
+}
+
+// Mostrar marcadores agrupados
+function mostrarClusters(puntos) {
+    // Agrupar puntos por coordenadas para mostrar información agregada
+    const puntosAgrupados = {};
+    puntos.forEach(punto => {
+        const coordKey = `${punto.lat.toFixed(6)},${punto.lng.toFixed(6)}`;
+        if (!puntosAgrupados[coordKey]) {
+            puntosAgrupados[coordKey] = {
+                lat: punto.lat,
+                lng: punto.lng,
+                puntos: [],
+                totalTrabajadores: 0,
+                totalHoras: 0
+            };
+        }
+        puntosAgrupados[coordKey].puntos.push(punto);
+        puntosAgrupados[coordKey].totalTrabajadores += punto.total_trabajadores || 0;
+        puntosAgrupados[coordKey].totalHoras += punto.total_horas || 0;
+    });
+    
+    // Crear marcadores para cada ubicación única
+    Object.values(puntosAgrupados).forEach(grupo => {
+        let marcador;
+        
+        if (grupo.puntos.length === 1) {
+            // Si solo hay un punto, usar marcador normal
+            marcador = crearMarcador(grupo.puntos[0]);
+        } else {
+            // Si hay múltiples puntos en la misma ubicación, crear marcador especial
+            const color = '#FF6B35'; // Color especial para grupos
+            marcador = L.circleMarker([grupo.lat, grupo.lng], {
+                radius: 15 + (grupo.puntos.length * 2), // Tamaño basado en cantidad
+                fillColor: color,
+                color: '#fff',
+                weight: 3,
+                opacity: 1,
+                fillOpacity: 0.8
+            });
+            
+            // Popup especial para grupos
+            const estadosUnicos = [...new Set(grupo.puntos.map(p => p.estado_obra))];
+            const interventoresUnicos = [...new Set(grupo.puntos.map(p => p.nombre_interventor))];
+            
+            const popupContent = `
+                <div style="min-width: 280px; max-width: 350px;">
+                    <h6 class="mb-2 text-primary">
+                        <i class="fas fa-layer-group me-1"></i>
+                        Ubicación Agrupada (${grupo.puntos.length} registros)
+                    </h6>
+                    <div class="mb-2">
+                        <span class="badge bg-warning text-dark">
+                            ${grupo.puntos.length} intervenciones
+                        </span>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-6">
+                            <small class="text-muted">Total Trabajadores</small><br>
+                            <strong class="text-primary">${grupo.totalTrabajadores}</strong>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Total Horas</small><br>
+                            <strong class="text-success">${grupo.totalHoras}</strong>
+                        </div>
+                    </div>
+                    <p class="mb-1">
+                        <strong>Estados:</strong><br>
+                        ${estadosUnicos.join(', ')}
+                    </p>
+                    <p class="mb-1">
+                        <strong>Interventores:</strong><br>
+                        ${interventoresUnicos.join(', ')}
+                    </p>
+                    <div class="text-center mt-2">
+                        <small class="text-muted">Click para ver detalles del primer registro</small>
+                    </div>
+                </div>
+            `;
+            
+            marcador.bindPopup(popupContent);
+            
+            // Click para mostrar información del primer punto
+            marcador.on('click', function() {
+                mostrarInfoPunto(grupo.puntos[0]);
+            });
+        }
+        
+        grupoCluster.addLayer(marcador);
+    });
+    
+    mapa.addLayer(grupoCluster);
+    
+    console.log(`Clusters: ${puntos.length} puntos agrupados en ${Object.keys(puntosAgrupados).length} ubicaciones`);
+}
+
+// Crear marcador individual
+function crearMarcador(punto) {
+    const color = coloresPorEstado[punto.estado_obra] || '#6c757d';
+    
+    const marcador = L.circleMarker([punto.lat, punto.lng], {
+        radius: 10,
+        fillColor: color,
+        color: '#fff',
+        weight: 3,
+        opacity: 1,
+        fillOpacity: 0.9
+    });
+    
+    // Popup con información básica mejorada
+    const popupContent = `
+        <div style="min-width: 250px; max-width: 300px;">
+            <h6 class="mb-2 text-primary">
+                <i class="fas fa-map-marker-alt me-1"></i>
+                ${punto.id_punto || 'Sin ID'}
+            </h6>
+            <div class="mb-2">
+                <span class="badge" style="background-color: ${color}; color: white; font-size: 0.8em;">
+                    ${punto.estado_obra || 'No especificado'}
+                </span>
             </div>
-            <div class="col-6">
-                <small class="text-muted">Horas total:</small>
-                <div class="fw-bold">${estadisticas.totalHoras.toLocaleString()}</div>
+            <p class="mb-1"><strong>Interventor:</strong><br> ${punto.nombre_interventor || 'No asignado'}</p>
+            <div class="row">
+                <div class="col-6">
+                    <small class="text-muted">Trabajadores</small><br>
+                    <strong class="text-primary">${punto.total_trabajadores || 0}</strong>
+                </div>
+                <div class="col-6">
+                    <small class="text-muted">Horas</small><br>
+                    <strong class="text-success">${punto.total_horas || 0}</strong>
+                </div>
             </div>
-            <div class="col-6">
-                <small class="text-muted">Estados:</small>
-                <div class="fw-bold">${estadisticas.estadosUnicos}</div>
-            </div>
-            <div class="col-6">
-                <small class="text-muted">Interventores:</small>
-                <div class="fw-bold">${estadisticas.interventoresUnicos}</div>
+            <div class="text-center mt-2">
+                <small class="text-muted">Click para ver detalles completos</small>
             </div>
         </div>
     `;
+    
+    marcador.bindPopup(popupContent);
+    
+    // Evento click para mostrar información detallada
+    marcador.on('click', function() {
+        mostrarInfoPunto(punto);
+    });
+    
+    return marcador;
 }
 
 // Mostrar información detallada de un punto
 function mostrarInfoPunto(punto) {
     const contenido = document.getElementById('contenidoInfoPunto');
     
+    // Formatear la fecha si existe
+    let fechaFormateada = punto.fecha_diligenciamiento;
+    if (fechaFormateada && fechaFormateada !== 'nan' && fechaFormateada !== '') {
+        try {
+            const fecha = new Date(fechaFormateada);
+            if (!isNaN(fecha.getTime())) {
+                fechaFormateada = fecha.toLocaleDateString('es-CO');
+            }
+        } catch (e) {
+            // Mantener formato original si hay error
+        }
+    }
+    
     contenido.innerHTML = `
-        <h6 class="text-primary">${punto.id_punto}</h6>
-        <hr>
-        <p><strong>Estado:</strong> 
-            <span class="badge" style="background-color: ${coloresPorEstado[punto.estado_obra]}">${punto.estado_obra}</span>
-        </p>
-        <p><strong>Interventor:</strong> ${punto.nombre_interventor}</p>
-        <p><strong>Fecha:</strong> ${punto.fecha_diligenciamiento}</p>
-        <p><strong>Trabajadores:</strong> ${punto.total_trabajadores}</p>
-        <p><strong>Horas:</strong> ${punto.total_horas}</p>
-        <p><strong>Coordenadas:</strong> ${punto.lat.toFixed(6)}, ${punto.lng.toFixed(6)}</p>
+        <div class="info-punto-detalle">
+            <h6 class="text-primary mb-3">
+                <i class="fas fa-map-marker-alt me-2"></i>
+                ${punto.id_punto || 'Sin ID'}
+            </h6>
+            <hr>
+            
+            <div class="mb-3">
+                <label class="text-muted small">ESTADO DE OBRA</label>
+                <div>
+                    <span class="badge fs-6 px-3 py-2" style="background-color: ${coloresPorEstado[punto.estado_obra] || '#6c757d'}">
+                        ${punto.estado_obra || 'No especificado'}
+                    </span>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="text-muted small">INTERVENTOR</label>
+                <div class="fw-bold">${punto.nombre_interventor || 'No asignado'}</div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="text-muted small">FECHA DE DILIGENCIAMIENTO</label>
+                <div class="fw-bold">${fechaFormateada || 'No registrada'}</div>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-6">
+                    <label class="text-muted small">TRABAJADORES</label>
+                    <div class="h5 text-primary mb-0">${punto.total_trabajadores || 0}</div>
+                </div>
+                <div class="col-6">
+                    <label class="text-muted small">HORAS TOTAL</label>
+                    <div class="h5 text-success mb-0">${punto.total_horas || 0}</div>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="text-muted small">COORDENADAS</label>
+                <div class="font-monospace small">
+                    <div>Lat: ${punto.lat.toFixed(6)}</div>
+                    <div>Lng: ${punto.lng.toFixed(6)}</div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-3">
+                <button class="btn btn-outline-secondary btn-sm" onclick="centrarEnPunto(${punto.lat}, ${punto.lng})">
+                    <i class="fas fa-crosshairs me-1"></i>Centrar en mapa
+                </button>
+            </div>
+        </div>
     `;
     
     showPanel('infoPunto');
+}
+
+// Función para centrar el mapa en un punto específico
+function centrarEnPunto(lat, lng) {
+    mapa.setView([lat, lng], 16);
 }
 
 // Ocultar información del punto
@@ -525,8 +826,7 @@ function ocultarInfoPunto() {
 
 // Funciones de filtros
 function aplicarFiltroMapa() {
-    actualizarMapa();
-    actualizarEstadisticas();
+    actualizarVisualizacion();
 }
 
 function limpiarFiltrosMapa() {
@@ -535,36 +835,86 @@ function limpiarFiltrosMapa() {
     aplicarFiltroMapa();
 }
 
+// Función de cambiar visualización
+function cambiarVisualizacion() {
+    const tipoAnterior = tipoVisualizacionActual;
+    tipoVisualizacionActual = document.getElementById('tipoVisualizacion').value;
+    console.log(`🔄 Cambiando visualización: ${tipoAnterior} → ${tipoVisualizacionActual}`);
+    actualizarVisualizacion();
+}
+
 // Función de centrar mapa
 function centrarMapa() {
-    if (datosPuntos.length > 0) {
-        const bounds = L.latLngBounds(datosPuntos.map(p => [p.lat, p.lng]));
-        mapa.fitBounds(bounds, { padding: [20, 20] });
+    const puntosFiltrados = aplicarFiltrosData();
+    if (puntosFiltrados.length > 0) {
+        if (puntosFiltrados.length === 1) {
+            // Si solo hay un punto, centrar en él con zoom alto
+            mapa.setView([puntosFiltrados[0].lat, puntosFiltrados[0].lng], 15);
+        } else {
+            // Si hay múltiples puntos, ajustar vista para mostrar todos
+            const bounds = L.latLngBounds(puntosFiltrados.map(p => [p.lat, p.lng]));
+            mapa.fitBounds(bounds, { 
+                padding: [30, 30],
+                maxZoom: 14 // Limitar zoom máximo para ver todos los puntos
+            });
+        }
     } else {
+        // Si no hay puntos, centrar en Medellín
         mapa.setView(configMapa.centro, configMapa.zoom);
     }
+    
+    console.log(`Mapa centrado para ${puntosFiltrados.length} puntos`);
 }
 
-// Función de cambiar visualización (placeholder)
-function cambiarVisualizacion() {
-    const tipo = document.getElementById('tipoVisualizacion').value;
-    console.log('Cambiar visualización a:', tipo);
-    // TODO: Implementar diferentes tipos de visualización
-}
-
-// Función de exportar (placeholder)
+// Función de exportar
 function exportarMapa() {
-    console.log('Exportar mapa');
-    // TODO: Implementar exportación
+    const dataStr = JSON.stringify(aplicarFiltrosData(), null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'datos_mapa_filtrados.json';
+    link.click();
+    URL.revokeObjectURL(url);
+}
+
+// Funciones auxiliares para manejo de paneles
+function showPanel(id) {
+    const element = document.getElementById(id);
+    if (element) element.classList.remove('hidden-panel');
+}
+
+function hidePanel(id) {
+    const element = document.getElementById(id);
+    if (element) element.classList.add('hidden-panel');
 }
 
 // Función para mostrar/ocultar carga
 function mostrarCarga(mostrar) {
-    // Simple indicador de carga en consola
     if (mostrar) {
-        console.log('Cargando datos del mapa...');
+        console.log('🔄 Cargando datos del mapa...');
+        // Crear o mostrar indicador de carga visual
+        let loadingIndicator = document.getElementById('mapLoadingIndicator');
+        if (!loadingIndicator) {
+            loadingIndicator = document.createElement('div');
+            loadingIndicator.id = 'mapLoadingIndicator';
+            loadingIndicator.innerHTML = `
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                           background: rgba(255,255,255,0.9); padding: 20px; border-radius: 10px; 
+                           text-align: center; z-index: 1000; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+                    <div class="spinner-border text-primary mb-2" role="status"></div>
+                    <div>Cargando datos del mapa...</div>
+                </div>
+            `;
+            document.getElementById('map').appendChild(loadingIndicator);
+        }
+        loadingIndicator.style.display = 'block';
     } else {
-        console.log('Carga completada.');
+        console.log('✅ Carga completada.');
+        const loadingIndicator = document.getElementById('mapLoadingIndicator');
+        if (loadingIndicator) {
+            loadingIndicator.style.display = 'none';
+        }
     }
 }
 </script>

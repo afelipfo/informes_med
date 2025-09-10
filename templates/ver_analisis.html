@@ -73,15 +73,6 @@
                                 </select>
                             </div>
 
-                            <!-- Filtro por comuna -->
-                            <div class="filter-group">
-                                <label for="filterComuna" class="form-label">Comuna</label>
-                                <select class="form-select" id="filterComuna" multiple>
-                                    <option value="">Todas las comunas</option>
-                                    <!-- Las opciones se cargarán dinámicamente -->
-                                </select>
-                            </div>
-
                             <!-- Filtro por rango de fechas -->
                             <div class="filter-group">
                                 <label class="form-label">Rango de Fechas</label>
@@ -451,32 +442,585 @@
                         </div>
                     </div>
                     {% endif %}
-
-                    <!-- Totales generales -->
-                    {% if estadisticas.actividades_construccion.totales_generales %}
-                    <div class="row mt-4">
-                        <div class="col-md-12">
-                            <div class="alert alert-info">
-                                <h6><i class="fas fa-chart-bar"></i> Totales Generales</h6>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <strong>Total de todas las actividades:</strong> 
-                                        {{ "%.2f"|format(estadisticas.actividades_construccion.totales_generales.total_todas_actividades) }}
-                                    </div>
-                                    <div class="col-md-6">
-                                        <strong>Promedio de actividades por obra:</strong> 
-                                        {{ "%.2f"|format(estadisticas.actividades_construccion.totales_generales.promedio_actividades_por_obra) }}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
     {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: Recursos Humanos -->
+        <div class="tab-pane fade" id="recursos" role="tabpanel" aria-labelledby="recursos-tab">
+            {% if estadisticas.recursos_humanos %}
+            <div class="row">
+                <!-- Métricas principales -->
+                <div class="col-md-12 mb-4">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <div class="kpi-card kpi-primary">
+                                <div class="kpi-content">
+                                    <div class="kpi-icon">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                    <div class="kpi-data">
+                                        <h3 class="kpi-number">{{ estadisticas.recursos_humanos.total_trabajadores }}</h3>
+                                        <p class="kpi-label">Total Trabajadores</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="kpi-card kpi-success">
+                                <div class="kpi-content">
+                                    <div class="kpi-icon">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                    <div class="kpi-data">
+                                        <h3 class="kpi-number">{{ "%.0f"|format(estadisticas.recursos_humanos.total_horas_trabajadas) }}</h3>
+                                        <p class="kpi-label">Total Horas</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="kpi-card kpi-info">
+                                <div class="kpi-content">
+                                    <div class="kpi-icon">
+                                        <i class="fas fa-user-tie"></i>
+                                    </div>
+                                    <div class="kpi-data">
+                                        <h3 class="kpi-number">{{ "%.1f"|format(estadisticas.recursos_humanos.promedio_trabajadores_por_obra) }}</h3>
+                                        <p class="kpi-label">Promedio por Obra</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="kpi-card kpi-warning">
+                                <div class="kpi-content">
+                                    <div class="kpi-icon">
+                                        <i class="fas fa-stopwatch"></i>
+                                    </div>
+                                    <div class="kpi-data">
+                                        <h3 class="kpi-number">{{ "%.1f"|format(estadisticas.recursos_humanos.promedio_horas_por_obra) }}</h3>
+                                        <p class="kpi-label">Horas Promedio/Obra</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Distribución de personal -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-chart-pie"></i>
+                                Distribución por Tipo de Personal
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="chartPersonalTab" width="400" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detalles por tipo -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-list"></i>
+                                Detalle por Categoría
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Tipo de Personal</th>
+                                            <th>Total</th>
+                                            <th>Porcentaje</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% set total_personal = estadisticas.recursos_humanos.total_trabajadores %}
+                                        <tr>
+                                            <td><i class="fas fa-user-alt"></i> Ayudantes</td>
+                                            <td>{{ estadisticas.recursos_humanos.total_ayudantes }}</td>
+                                            <td>{{ "%.1f"|format((estadisticas.recursos_humanos.total_ayudantes / total_personal * 100) if total_personal > 0 else 0) }}%</td>
+                                        </tr>
+                                        <tr>
+                                            <td><i class="fas fa-user-tie"></i> Oficiales</td>
+                                            <td>{{ estadisticas.recursos_humanos.total_oficiales }}</td>
+                                            <td>{{ "%.1f"|format((estadisticas.recursos_humanos.total_oficiales / total_personal * 100) if total_personal > 0 else 0) }}%</td>
+                                        </tr>
+                                        <tr>
+                                            <td><i class="fas fa-user-cog"></i> Operadores</td>
+                                            <td>{{ estadisticas.recursos_humanos.total_operadores }}</td>
+                                            <td>{{ "%.1f"|format((estadisticas.recursos_humanos.total_operadores / total_personal * 100) if total_personal > 0 else 0) }}%</td>
+                                        </tr>
+                                        <tr>
+                                            <td><i class="fas fa-user-check"></i> Auxiliares</td>
+                                            <td>{{ estadisticas.recursos_humanos.total_auxiliares }}</td>
+                                            <td>{{ "%.1f"|format((estadisticas.recursos_humanos.total_auxiliares / total_personal * 100) if total_personal > 0 else 0) }}%</td>
+                                        </tr>
+                                        <tr>
+                                            <td><i class="fas fa-user"></i> Otros</td>
+                                            <td>{{ estadisticas.recursos_humanos.total_otros }}</td>
+                                            <td>{{ "%.1f"|format((estadisticas.recursos_humanos.total_otros / total_personal * 100) if total_personal > 0 else 0) }}%</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Estadísticas detalladas -->
+                {% if estadisticas.recursos_humanos.estadisticas_trabajadores %}
+                <div class="col-md-12 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-chart-bar"></i>
+                                Estadísticas Detalladas
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Distribución de Trabajadores por Obra</h6>
+                                    <ul class="list-unstyled">
+                                        <li><strong>Promedio:</strong> {{ "%.1f"|format(estadisticas.recursos_humanos.estadisticas_trabajadores.mean) }} trabajadores</li>
+                                        <li><strong>Máximo:</strong> {{ "%.0f"|format(estadisticas.recursos_humanos.estadisticas_trabajadores.max) }} trabajadores</li>
+                                        <li><strong>Mínimo:</strong> {{ "%.0f"|format(estadisticas.recursos_humanos.estadisticas_trabajadores.min) }} trabajadores</li>
+                                        <li><strong>Mediana:</strong> {{ "%.1f"|format(estadisticas.recursos_humanos.estadisticas_trabajadores['50%']) }} trabajadores</li>
+                                    </ul>
+                                </div>
+                                {% if estadisticas.recursos_humanos.estadisticas_horas %}
+                                <div class="col-md-6">
+                                    <h6>Distribución de Horas por Obra</h6>
+                                    <ul class="list-unstyled">
+                                        <li><strong>Promedio:</strong> {{ "%.1f"|format(estadisticas.recursos_humanos.estadisticas_horas.mean) }} horas</li>
+                                        <li><strong>Máximo:</strong> {{ "%.0f"|format(estadisticas.recursos_humanos.estadisticas_horas.max) }} horas</li>
+                                        <li><strong>Mínimo:</strong> {{ "%.0f"|format(estadisticas.recursos_humanos.estadisticas_horas.min) }} horas</li>
+                                        <li><strong>Mediana:</strong> {{ "%.1f"|format(estadisticas.recursos_humanos.estadisticas_horas['50%']) }} horas</li>
+                                    </ul>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="alert alert-warning text-center">
+                <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                <h4>No hay datos de recursos humanos</h4>
+                <p>No se encontraron datos de recursos humanos en el archivo cargado.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Tab 3: Maquinaria y Equipos -->
+        <div class="tab-pane fade" id="maquinaria" role="tabpanel" aria-labelledby="maquinaria-tab">
+            {% if estadisticas.maquinaria %}
+            <div class="row">
+                <!-- Métricas principales -->
+                <div class="col-md-12 mb-4">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <div class="kpi-card kpi-primary">
+                                <div class="kpi-content">
+                                    <div class="kpi-icon">
+                                        <i class="fas fa-cogs"></i>
+                                    </div>
+                                    <div class="kpi-data">
+                                        <h3 class="kpi-number">{{ "%.0f"|format(estadisticas.maquinaria.total_horas_maquinaria) }}</h3>
+                                        <p class="kpi-label">Total Horas Maquinaria</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="kpi-card kpi-success">
+                                <div class="kpi-content">
+                                    <div class="kpi-icon">
+                                        <i class="fas fa-truck"></i>
+                                    </div>
+                                    <div class="kpi-data">
+                                        <h3 class="kpi-number">{{ "%.0f"|format(estadisticas.maquinaria.total_horas_retroexcavadora) }}</h3>
+                                        <p class="kpi-label">Retroexcavadora</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="kpi-card kpi-info">
+                                <div class="kpi-content">
+                                    <div class="kpi-icon">
+                                        <i class="fas fa-truck-loading"></i>
+                                    </div>
+                                    <div class="kpi-data">
+                                        <h3 class="kpi-number">{{ "%.0f"|format(estadisticas.maquinaria.total_horas_minicargador) }}</h3>
+                                        <p class="kpi-label">Minicargador</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="kpi-card kpi-warning">
+                                <div class="kpi-content">
+                                    <div class="kpi-icon">
+                                        <i class="fas fa-shipping-fast"></i>
+                                    </div>
+                                    <div class="kpi-data">
+                                        <h3 class="kpi-number">{{ "%.0f"|format(estadisticas.maquinaria.total_horas_volqueta) }}</h3>
+                                        <p class="kpi-label">Volqueta</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráfico de maquinaria -->
+                <div class="col-md-8 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-chart-bar"></i>
+                                Distribución de Horas por Tipo de Maquinaria
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="chartMaquinariaTab" width="400" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detalles por tipo -->
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-list"></i>
+                                Resumen de Uso
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Tipo</th>
+                                            <th>Horas</th>
+                                            <th>%</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% set total_horas = estadisticas.maquinaria.total_horas_maquinaria %}
+                                        <tr>
+                                            <td><i class="fas fa-truck text-primary"></i> Retroexcavadora</td>
+                                            <td>{{ "%.1f"|format(estadisticas.maquinaria.total_horas_retroexcavadora) }}</td>
+                                            <td>{{ "%.1f"|format((estadisticas.maquinaria.total_horas_retroexcavadora / total_horas * 100) if total_horas > 0 else 0) }}%</td>
+                                        </tr>
+                                        <tr>
+                                            <td><i class="fas fa-truck-loading text-success"></i> Minicargador</td>
+                                            <td>{{ "%.1f"|format(estadisticas.maquinaria.total_horas_minicargador) }}</td>
+                                            <td>{{ "%.1f"|format((estadisticas.maquinaria.total_horas_minicargador / total_horas * 100) if total_horas > 0 else 0) }}%</td>
+                                        </tr>
+                                        <tr>
+                                            <td><i class="fas fa-shipping-fast text-warning"></i> Volqueta</td>
+                                            <td>{{ "%.1f"|format(estadisticas.maquinaria.total_horas_volqueta) }}</td>
+                                            <td>{{ "%.1f"|format((estadisticas.maquinaria.total_horas_volqueta / total_horas * 100) if total_horas > 0 else 0) }}%</td>
+                                        </tr>
+                                        <tr>
+                                            <td><i class="fas fa-tractor text-info"></i> Compactadora</td>
+                                            <td>{{ "%.1f"|format(estadisticas.maquinaria.total_horas_compactadora) }}</td>
+                                            <td>{{ "%.1f"|format((estadisticas.maquinaria.total_horas_compactadora / total_horas * 100) if total_horas > 0 else 0) }}%</td>
+                                        </tr>
+                                        <tr>
+                                            <td><i class="fas fa-cog text-secondary"></i> Otra</td>
+                                            <td>{{ "%.1f"|format(estadisticas.maquinaria.total_horas_otra) }}</td>
+                                            <td>{{ "%.1f"|format((estadisticas.maquinaria.total_horas_otra / total_horas * 100) if total_horas > 0 else 0) }}%</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <hr>
+                            <p class="mb-0"><strong>Promedio horas por obra:</strong> {{ "%.1f"|format(estadisticas.maquinaria.promedio_horas_por_obra) }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tipos de maquinaria usada -->
+                {% if estadisticas.maquinaria.tipos_maquinaria_usada %}
+                <div class="col-md-12 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-tools"></i>
+                                Tipos de Maquinaria Utilizados
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                {% for tipo, cantidad in estadisticas.maquinaria.tipos_maquinaria_usada.items() %}
+                                <div class="col-md-4 mb-3">
+                                    <div class="alert alert-light">
+                                        <strong>{{ tipo }}:</strong> {{ cantidad }} obras
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="alert alert-warning text-center">
+                <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                <h4>No hay datos de maquinaria</h4>
+                <p>No se encontraron datos de maquinaria y equipos en el archivo cargado.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Tab 4: Actividades -->
+        <div class="tab-pane fade" id="actividades" role="tabpanel" aria-labelledby="actividades-tab">
+            {% if estadisticas.actividades_construccion %}
+            <div class="row">
+                <!-- Métricas principales -->
+                <div class="col-md-12 mb-4">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <div class="kpi-card kpi-primary">
+                                <div class="kpi-content">
+                                    <div class="kpi-icon">
+                                        <i class="fas fa-tasks"></i>
+                                    </div>
+                                    <div class="kpi-data">
+                                        <h3 class="kpi-number">{{ "%.0f"|format(estadisticas.actividades_construccion.totales_generales.total_todas_actividades) }}</h3>
+                                        <p class="kpi-label">Total Actividades</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="kpi-card kpi-success">
+                                <div class="kpi-content">
+                                    <div class="kpi-icon">
+                                        <i class="fas fa-percentage"></i>
+                                    </div>
+                                    <div class="kpi-data">
+                                        <h3 class="kpi-number">{{ "%.1f"|format(estadisticas.actividades_construccion.cobertura_actividades.porcentaje_cobertura) }}%</h3>
+                                        <p class="kpi-label">Cobertura Variables</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="kpi-card kpi-info">
+                                <div class="kpi-content">
+                                    <div class="kpi-icon">
+                                        <i class="fas fa-chart-line"></i>
+                                    </div>
+                                    <div class="kpi-data">
+                                        <h3 class="kpi-number">{{ estadisticas.actividades_construccion.cobertura_actividades.columnas_con_datos }}</h3>
+                                        <p class="kpi-label">Variables con Datos</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="kpi-card kpi-warning">
+                                <div class="kpi-content">
+                                    <div class="kpi-icon">
+                                        <i class="fas fa-calculator"></i>
+                                    </div>
+                                    <div class="kpi-data">
+                                        <h3 class="kpi-number">{{ "%.2f"|format(estadisticas.actividades_construccion.totales_generales.promedio_actividades_por_obra) }}</h3>
+                                        <p class="kpi-label">Promedio por Obra</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actividades principales -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-star"></i>
+                                Top 10 Actividades Principales
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% if estadisticas.actividades_construccion.actividades_mas_comunes %}
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Actividad</th>
+                                            <th>Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for actividad, valor in estadisticas.actividades_construccion.actividades_mas_comunes.items() %}
+                                        <tr>
+                                            <td>{{ loop.index }}</td>
+                                            <td>{{ actividad }}</td>
+                                            <td><span class="badge bg-primary">{{ "%.1f"|format(valor) }}</span></td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <p class="text-muted">No hay datos disponibles</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cobertura de actividades -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-chart-pie"></i>
+                                Cobertura de Variables
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="progress mb-3" style="height: 30px;">
+                                <div class="progress-bar bg-success" role="progressbar" 
+                                     data-width="{{ estadisticas.actividades_construccion.cobertura_actividades.porcentaje_cobertura }}"
+                                     aria-label="Cobertura de actividades"
+                                     style="font-size: 14px; padding-top: 5px;">
+                                    {{ "%.1f"|format(estadisticas.actividades_construccion.cobertura_actividades.porcentaje_cobertura) }}%
+                                </div>
+                            </div>
+                            <p class="mb-3">
+                                <strong>{{ estadisticas.actividades_construccion.cobertura_actividades.columnas_con_datos }}</strong> de 
+                                <strong>{{ estadisticas.actividades_construccion.cobertura_actividades.columnas_totales }}</strong> 
+                                variables de actividades tienen datos registrados
+                            </p>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i>
+                                <strong>Total de actividades registradas:</strong><br>
+                                {{ "%.2f"|format(estadisticas.actividades_construccion.totales_generales.total_todas_actividades) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Análisis detallado por grupos -->
+                {% if estadisticas.actividades_construccion.resumen_por_grupo %}
+                <div class="col-md-12 mb-4">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="fas fa-layer-group"></i>
+                                Análisis Detallado por Grupos de Actividades
+                            </h5>
+                            <div>
+                                <button class="btn btn-sm btn-outline-primary" onclick="expandirTodosActividades()">
+                                    <i class="fas fa-expand-alt"></i> Expandir Todos
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="colapsarTodosActividades()">
+                                    <i class="fas fa-compress-alt"></i> Colapsar Todos
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="accordion" id="gruposActividadesTab">
+                                {% for grupo, datos in estadisticas.actividades_construccion.resumen_por_grupo.items() %}
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="heading{{ loop.index }}">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                                data-bs-target="#collapse{{ loop.index }}" aria-expanded="false" 
+                                                aria-controls="collapse{{ loop.index }}">
+                                            <div class="d-flex justify-content-between w-100 me-3">
+                                                <span><strong>{{ grupo.replace('_', ' ').title() }}</strong></span>
+                                                <div>
+                                                    <span class="badge bg-primary me-2">Total: {{ "%.1f"|format(datos.total_grupo) }}</span>
+                                                    <span class="badge bg-secondary">{{ datos.columnas_analizadas|length }} variables</span>
+                                                </div>
+                                            </div>
+                                        </button>
+                                    </h2>
+                                    <div id="collapse{{ loop.index }}" class="accordion-collapse collapse" 
+                                         aria-labelledby="heading{{ loop.index }}" data-bs-parent="#gruposActividadesTab">
+                                        <div class="accordion-body">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <h6>Resumen del Grupo</h6>
+                                                    <ul class="list-unstyled">
+                                                        <li><strong>Total del grupo:</strong> {{ "%.2f"|format(datos.total_grupo) }}</li>
+                                                        <li><strong>Obras con actividad:</strong> {{ datos.obras_con_actividad }}</li>
+                                                        <li><strong>Promedio por obra:</strong> {{ "%.2f"|format(datos.promedio_por_obra) }}</li>
+                                                        <li><strong>Variables analizadas:</strong> {{ datos.columnas_analizadas|length }}</li>
+                                                    </ul>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <h6>Detalle por Actividad</h6>
+                                                    <div class="table-responsive">
+                                                        <table class="table table-sm">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Actividad</th>
+                                                                    <th>Total</th>
+                                                                    <th>Obras</th>
+                                                                    <th>Promedio</th>
+                                                                    <th>Máximo</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {% for actividad, valores in datos.totales_por_actividad.items() %}
+                                                                <tr>
+                                                                    <td>{{ actividad }}</td>
+                                                                    <td>{{ "%.2f"|format(valores.total) }}</td>
+                                                                    <td>{{ valores.obras_con_actividad }}</td>
+                                                                    <td>{{ "%.2f"|format(valores.promedio) }}</td>
+                                                                    <td>{{ "%.2f"|format(valores.maximo) }}</td>
+                                                                </tr>
+                                                                {% endfor %}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="alert alert-warning text-center">
+                <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                <h4>No hay datos de actividades</h4>
+                <p>No se encontraron datos de actividades de construcción en el archivo cargado.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
 
     <!-- Análisis geográfico -->
     {% if estadisticas.analisis_geografico %}
@@ -619,18 +1163,81 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     {% endif %}
     
+    // Gráfico de distribución de personal (tab individual)
+    {% if estadisticas.recursos_humanos %}
+    const ctxPersonalTab = document.getElementById('chartPersonalTab');
+    if (ctxPersonalTab) {
+        new Chart(ctxPersonalTab, {
+            type: 'doughnut',
+            data: {
+                labels: {{ estadisticas.recursos_humanos.distribucion_personal.keys()|list|tojson }},
+                datasets: [{
+                    data: {{ estadisticas.recursos_humanos.distribucion_personal.values()|list|tojson }},
+                    backgroundColor: [
+                        '#FF6384',
+                        '#36A2EB',
+                        '#FFCE56',
+                        '#4BC0C0',
+                        '#9966FF'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+    {% endif %}
+    
+    // Gráfico de maquinaria (tab individual)
+    {% if estadisticas.maquinaria %}
+    const ctxMaquinariaTab = document.getElementById('chartMaquinariaTab');
+    if (ctxMaquinariaTab) {
+        new Chart(ctxMaquinariaTab, {
+            type: 'bar',
+            data: {
+                labels: {{ estadisticas.maquinaria.distribucion_horas_maquinaria.keys()|list|tojson }},
+                datasets: [{
+                    label: 'Horas',
+                    data: {{ estadisticas.maquinaria.distribucion_horas_maquinaria.values()|list|tojson }},
+                    backgroundColor: [
+                        '#FF6384',
+                        '#36A2EB', 
+                        '#FFCE56',
+                        '#4BC0C0',
+                        '#9966FF'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+    {% endif %}
+    
     {% endif %}
 
-    // Funciones para controlar el accordion
-    function expandirTodos() {
-        const acordeones = document.querySelectorAll('#gruposActividades .accordion-collapse');
+    // Funciones para controlar el accordion en actividades
+    function expandirTodosActividades() {
+        const acordeones = document.querySelectorAll('#gruposActividadesTab .accordion-collapse');
         acordeones.forEach(acordeon => {
             const bsCollapse = new bootstrap.Collapse(acordeon, {show: true});
         });
     }
 
-    function colapsarTodos() {
-        const acordeones = document.querySelectorAll('#gruposActividades .accordion-collapse.show');
+    function colapsarTodosActividades() {
+        const acordeones = document.querySelectorAll('#gruposActividadesTab .accordion-collapse.show');
         acordeones.forEach(acordeon => {
             const bsCollapse = bootstrap.Collapse.getInstance(acordeon);
             if (bsCollapse) {
@@ -647,6 +1254,223 @@ document.addEventListener('DOMContentLoaded', function() {
         const width = bar.getAttribute('data-width');
         bar.style.width = width + '%';
     });
+});
+
+// Funciones para filtros
+function aplicarFiltros() {
+    const filterEstado = document.getElementById('filterEstado');
+    const fechaInicio = document.getElementById('fechaInicio');
+    const fechaFin = document.getElementById('fechaFin');
+    
+    // Obtener valores seleccionados
+    const estadosSeleccionados = Array.from(filterEstado.selectedOptions).map(option => option.value).filter(v => v !== '');
+    const fechaInicioValue = fechaInicio.value;
+    const fechaFinValue = fechaFin.value;
+    
+    // Mostrar mensaje de filtros aplicados
+    let mensaje = 'Filtros aplicados:';
+    if (estadosSeleccionados.length > 0) {
+        mensaje += ` Estados: ${estadosSeleccionados.join(', ')}`;
+    }
+    if (fechaInicioValue) {
+        mensaje += ` Desde: ${fechaInicioValue}`;
+    }
+    if (fechaFinValue) {
+        mensaje += ` Hasta: ${fechaFinValue}`;
+    }
+    
+    // Mostrar alerta temporal
+    if (estadosSeleccionados.length > 0 || fechaInicioValue || fechaFinValue) {
+        mostrarAlerta(mensaje, 'info');
+        
+        // Llamar al endpoint para filtrar datos
+        aplicarFiltrosEnServidor({
+            estados: estadosSeleccionados,
+            fechaInicio: fechaInicioValue,
+            fechaFin: fechaFinValue
+        });
+    } else {
+        mostrarAlerta('No se han seleccionado filtros', 'warning');
+    }
+}
+
+function limpiarFiltros() {
+    // Limpiar todos los filtros
+    document.getElementById('filterEstado').selectedIndex = 0;
+    document.getElementById('fechaInicio').value = '';
+    document.getElementById('fechaFin').value = '';
+    
+    // Deseleccionar todas las opciones múltiples
+    const selectMultiples = document.querySelectorAll('select[multiple]');
+    selectMultiples.forEach(select => {
+        Array.from(select.options).forEach(option => {
+            option.selected = false;
+        });
+    });
+    
+    mostrarAlerta('Filtros limpiados', 'success');
+    
+    // Recargar página sin filtros
+    setTimeout(() => {
+        window.location.href = window.location.pathname;
+    }, 1000);
+}
+
+function mostrarAlerta(mensaje, tipo = 'info') {
+    // Crear elemento de alerta
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${tipo} alert-dismissible fade show position-fixed`;
+    alertDiv.style.cssText = 'top: 80px; right: 20px; z-index: 9999; max-width: 400px;';
+    alertDiv.innerHTML = `
+        ${mensaje}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    
+    // Agregar al DOM
+    document.body.appendChild(alertDiv);
+    
+    // Auto-remover después de 3 segundos
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 3000);
+}
+
+function aplicarFiltrosEnServidor(filtros) {
+    // Mostrar indicador de carga
+    const btnAplicar = document.querySelector('button[onclick="aplicarFiltros()"]');
+    const textoOriginal = btnAplicar.innerHTML;
+    btnAplicar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Aplicando...';
+    btnAplicar.disabled = true;
+    
+    // Realizar llamada al servidor
+    fetch('/api/aplicar_filtros', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(filtros)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error en la respuesta del servidor');
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Actualizar la página con los datos filtrados
+        if (data.filtros_aplicados) {
+            const mensaje = `Filtros aplicados: ${data.filtros_aplicados.total_registros_filtrados} de ${data.filtros_aplicados.total_registros_originales} registros`;
+            mostrarAlerta(mensaje, 'success');
+            
+            // Actualizar métricas en tiempo real
+            actualizarMetricas(data);
+            
+            // Actualizar gráficos
+            actualizarGraficos(data);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        mostrarAlerta('Error aplicando filtros: ' + error.message, 'danger');
+    })
+    .finally(() => {
+        btnAplicar.innerHTML = textoOriginal;
+        btnAplicar.disabled = false;
+    });
+}
+
+function actualizarMetricas(data) {
+    // Actualizar KPIs principales
+    if (data.metadata) {
+        const totalIntervencionesEl = document.querySelector('.kpi-card .kpi-number');
+        if (totalIntervencionesEl) {
+            totalIntervencionesEl.textContent = data.metadata.total_registros;
+        }
+    }
+    
+    if (data.recursos_humanos) {
+        const kpiElements = document.querySelectorAll('.kpi-card .kpi-number');
+        if (kpiElements[1]) kpiElements[1].textContent = data.recursos_humanos.total_trabajadores || 0;
+        if (kpiElements[2]) kpiElements[2].textContent = Math.round(data.recursos_humanos.total_horas_trabajadas || 0);
+    }
+    
+    if (data.maquinaria) {
+        const kpiElements = document.querySelectorAll('.kpi-card .kpi-number');
+        if (kpiElements[3]) kpiElements[3].textContent = Math.round(data.maquinaria.total_horas_maquinaria || 0);
+    }
+}
+
+function actualizarGraficos(data) {
+    // Actualizar gráfico de estados
+    if (data.metricas_generales && data.metricas_generales.estados_obra) {
+        const chartEstados = Chart.getChart('chartEstados');
+        if (chartEstados) {
+            chartEstados.data.labels = Object.keys(data.metricas_generales.estados_obra);
+            chartEstados.data.datasets[0].data = Object.values(data.metricas_generales.estados_obra);
+            chartEstados.update();
+        }
+    }
+    
+    // Actualizar gráfico de personal
+    if (data.recursos_humanos && data.recursos_humanos.distribucion_personal) {
+        const chartPersonal = Chart.getChart('chartPersonal');
+        if (chartPersonal) {
+            chartPersonal.data.labels = Object.keys(data.recursos_humanos.distribucion_personal);
+            chartPersonal.data.datasets[0].data = Object.values(data.recursos_humanos.distribucion_personal);
+            chartPersonal.update();
+        }
+        
+        // También actualizar el gráfico del tab de recursos humanos
+        const chartPersonalTab = Chart.getChart('chartPersonalTab');
+        if (chartPersonalTab) {
+            chartPersonalTab.data.labels = Object.keys(data.recursos_humanos.distribucion_personal);
+            chartPersonalTab.data.datasets[0].data = Object.values(data.recursos_humanos.distribucion_personal);
+            chartPersonalTab.update();
+        }
+    }
+    
+    // Actualizar gráfico de maquinaria
+    if (data.maquinaria && data.maquinaria.distribucion_horas_maquinaria) {
+        const chartMaquinaria = Chart.getChart('chartMaquinaria');
+        if (chartMaquinaria) {
+            chartMaquinaria.data.labels = Object.keys(data.maquinaria.distribucion_horas_maquinaria);
+            chartMaquinaria.data.datasets[0].data = Object.values(data.maquinaria.distribucion_horas_maquinaria);
+            chartMaquinaria.update();
+        }
+        
+        // También actualizar el gráfico del tab de maquinaria
+        const chartMaquinariaTab = Chart.getChart('chartMaquinariaTab');
+        if (chartMaquinariaTab) {
+            chartMaquinariaTab.data.labels = Object.keys(data.maquinaria.distribucion_horas_maquinaria);
+            chartMaquinariaTab.data.datasets[0].data = Object.values(data.maquinaria.distribucion_horas_maquinaria);
+            chartMaquinariaTab.update();
+        }
+    }
+}
+
+// Inicializar filtros cuando el documento esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    // Agregar event listeners para validación de fechas
+    const fechaInicio = document.getElementById('fechaInicio');
+    const fechaFin = document.getElementById('fechaFin');
+    
+    if (fechaInicio && fechaFin) {
+        fechaInicio.addEventListener('change', function() {
+            if (fechaFin.value && fechaInicio.value > fechaFin.value) {
+                mostrarAlerta('La fecha de inicio no puede ser mayor que la fecha de fin', 'warning');
+                fechaInicio.value = '';
+            }
+        });
+        
+        fechaFin.addEventListener('change', function() {
+            if (fechaInicio.value && fechaFin.value < fechaInicio.value) {
+                mostrarAlerta('La fecha de fin no puede ser menor que la fecha de inicio', 'warning');
+                fechaFin.value = '';
+            }
+        });
+    }
 });
 </script>
 {% endblock %}
