@@ -327,48 +327,66 @@ def crear_aplicacion():
             return jsonify({'error': 'No hay datos cargados'}), 400
         
         try:
-            from modulos.generadores_pdf import InformeEstadistico
+            from modulos.generador_inteligente import GeneradorInformeInteligente
             
-            # Generar informe con AI
-            generador = InformeEstadistico(app.datos_cargados)
-            buffer = generador.generar_pdf()
+            # Generar informe con AI avanzada
+            generador = GeneradorInformeInteligente(app.datos_cargados)
+            
+            # Crear nombre de archivo temporal
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            nombre_archivo = f'datos/reportes_generados/informe_estadistico_inteligente_{timestamp}.pdf'
+            
+            # Asegurar que el directorio existe
+            os.makedirs('datos/reportes_generados', exist_ok=True)
+            
+            # Generar informe inteligente
+            archivo_generado = generador.generar_informe_estadistico_inteligente(nombre_archivo)
             
             return send_file(
-                buffer,
+                archivo_generado,
                 as_attachment=True,
-                download_name=f'informe_estadistico_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf',
+                download_name=f'informe_estadistico_inteligente_{timestamp}.pdf',
                 mimetype='application/pdf'
             )
             
         except Exception as e:
-            app.logger.error(f"Error generando informe estadístico: {str(e)}")
+            app.logger.error(f"Error generando informe estadístico inteligente: {str(e)}")
             return jsonify({'error': 'Error generando informe', 'detalles': str(e)}), 500
 
     @app.route('/api/generar_informe_detallado/<formato>')
     def api_generar_informe_detallado(formato):
-        """Generar informe detallado con análisis exhaustivo"""
+        """Generar informe detallado con análisis exhaustivo usando IA"""
         if app.datos_cargados is None:
             return jsonify({'error': 'No hay datos cargados'}), 400
         
         try:
             if formato.lower() == 'pdf':
-                from modulos.generadores_pdf import InformeDetallado
+                from modulos.generador_inteligente import GeneradorInformeInteligente
                 
-                # Generar informe detallado con AI
-                generador = InformeDetallado(app.datos_cargados)
-                buffer = generador.generar_pdf()
+                # Generar informe detallado con AI avanzada
+                generador = GeneradorInformeInteligente(app.datos_cargados)
+                
+                # Crear nombre de archivo temporal
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                nombre_archivo = f'datos/reportes_generados/informe_detallado_inteligente_{timestamp}.pdf'
+                
+                # Asegurar que el directorio existe
+                os.makedirs('datos/reportes_generados', exist_ok=True)
+                
+                # Generar informe inteligente
+                archivo_generado = generador.generar_informe_detallado_inteligente(nombre_archivo)
                 
                 return send_file(
-                    buffer,
+                    archivo_generado,
                     as_attachment=True,
-                    download_name=f'informe_detallado_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf',
+                    download_name=f'informe_detallado_inteligente_{timestamp}.pdf',
                     mimetype='application/pdf'
                 )
             else:
                 return jsonify({'error': 'Solo se soporta formato PDF para informe detallado'}), 400
                 
         except Exception as e:
-            app.logger.error(f"Error generando informe detallado: {str(e)}")
+            app.logger.error(f"Error generando informe detallado inteligente: {str(e)}")
             return jsonify({'error': 'Error generando informe', 'detalles': str(e)}), 500
 
     @app.route('/api/generar_informe_geografico')
@@ -440,27 +458,110 @@ def crear_aplicacion():
 
     @app.route('/api/generar_informe_ejecutivo')
     def api_generar_informe_ejecutivo():
-        """Generar resumen ejecutivo estratégico en formato PDF"""
+        """Generar resumen ejecutivo estratégico con IA en formato PDF"""
+        if app.datos_cargados is None:
+            return jsonify({'error': 'No hay datos cargados'}), 400
+        
+        try:
+            from modulos.generador_inteligente import GeneradorInformeInteligente
+            
+            # Generar resumen ejecutivo con AI avanzada
+            generador = GeneradorInformeInteligente(app.datos_cargados)
+            
+            # Crear nombre de archivo temporal
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            nombre_archivo = f'datos/reportes_generados/resumen_ejecutivo_inteligente_{timestamp}.pdf'
+            
+            # Asegurar que el directorio existe
+            os.makedirs('datos/reportes_generados', exist_ok=True)
+            
+            # Generar informe inteligente
+            archivo_generado = generador.generar_informe_ejecutivo_inteligente(nombre_archivo)
+            
+            return send_file(
+                archivo_generado,
+                as_attachment=True,
+                download_name=f'resumen_ejecutivo_inteligente_{timestamp}.pdf',
+                mimetype='application/pdf'
+            )
+            
+        except Exception as e:
+            app.logger.error(f"Error generando resumen ejecutivo inteligente: {str(e)}")
+            return jsonify({'error': 'Error generando informe', 'detalles': str(e)}), 500
+
+    # ==================== RUTAS PARA INFORMES TRADICIONALES ====================
+    
+    @app.route('/api/generar_informe_tradicional_estadistico')
+    def api_generar_informe_tradicional_estadistico():
+        """Generar informe estadístico tradicional (sin IA) en formato PDF"""
+        if app.datos_cargados is None:
+            return jsonify({'error': 'No hay datos cargados'}), 400
+        
+        try:
+            from modulos.generadores_pdf import InformeEstadistico
+            
+            # Generar informe tradicional
+            generador = InformeEstadistico(app.datos_cargados)
+            buffer = generador.generar_pdf()
+            
+            return send_file(
+                buffer,
+                as_attachment=True,
+                download_name=f'informe_estadistico_tradicional_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf',
+                mimetype='application/pdf'
+            )
+            
+        except Exception as e:
+            app.logger.error(f"Error generando informe estadístico tradicional: {str(e)}")
+            return jsonify({'error': 'Error generando informe tradicional', 'detalles': str(e)}), 500
+    
+    @app.route('/api/generar_informe_tradicional_detallado')
+    def api_generar_informe_tradicional_detallado():
+        """Generar informe detallado tradicional (sin IA) en formato PDF"""
+        if app.datos_cargados is None:
+            return jsonify({'error': 'No hay datos cargados'}), 400
+        
+        try:
+            from modulos.generadores_pdf import InformeDetallado
+            
+            # Generar informe detallado tradicional
+            generador = InformeDetallado(app.datos_cargados)
+            buffer = generador.generar_pdf()
+            
+            return send_file(
+                buffer,
+                as_attachment=True,
+                download_name=f'informe_detallado_tradicional_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf',
+                mimetype='application/pdf'
+            )
+            
+        except Exception as e:
+            app.logger.error(f"Error generando informe detallado tradicional: {str(e)}")
+            return jsonify({'error': 'Error generando informe tradicional', 'detalles': str(e)}), 500
+    
+    @app.route('/api/generar_informe_tradicional_ejecutivo')
+    def api_generar_informe_tradicional_ejecutivo():
+        """Generar resumen ejecutivo tradicional (sin IA) en formato PDF"""
         if app.datos_cargados is None:
             return jsonify({'error': 'No hay datos cargados'}), 400
         
         try:
             from modulos.generadores_pdf import ResumenEjecutivo
             
-            # Generar resumen ejecutivo con AI
+            # Generar resumen ejecutivo tradicional
             generador = ResumenEjecutivo(app.datos_cargados)
             buffer = generador.generar_pdf()
             
             return send_file(
                 buffer,
                 as_attachment=True,
-                download_name=f'resumen_ejecutivo_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf',
+                download_name=f'resumen_ejecutivo_tradicional_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf',
                 mimetype='application/pdf'
             )
             
         except Exception as e:
-            app.logger.error(f"Error generando resumen ejecutivo: {str(e)}")
-            return jsonify({'error': 'Error generando informe', 'detalles': str(e)}), 500
+            app.logger.error(f"Error generando resumen ejecutivo tradicional: {str(e)}")
+            return jsonify({'error': 'Error generando informe tradicional', 'detalles': str(e)}), 500
 
     @app.route('/mapa_intervenciones')
     def mapa_intervenciones():

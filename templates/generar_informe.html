@@ -83,33 +83,75 @@
                     </h5>
                 </div>
                 <div class="config-body text-center">
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <button class="btn btn-primary btn-lg w-100 report-btn" onclick="generarInformeEspecifico('estadistico')">
-                                <div class="report-icon">
-                                    <i class="fas fa-chart-bar fa-3x mb-3"></i>
-                                </div>
-                                <h6 class="report-title">Informe Estadístico</h6>
-                                <p class="report-description">Resumen estadístico con gráficos y métricas clave</p>
-                            </button>
+                    <!-- Informes Tradicionales -->
+                    <div class="mb-4">
+                        <h6 class="text-muted mb-3 text-start">
+                            <i class="fas fa-chart-bar me-2"></i>Informes Tradicionales
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <button class="btn btn-outline-primary btn-lg w-100 report-btn" onclick="generarInformeTradicional('estadistico')">
+                                    <div class="report-icon">
+                                        <i class="fas fa-chart-line fa-3x mb-3"></i>
+                                    </div>
+                                    <h6 class="report-title">Estadístico</h6>
+                                    <p class="report-description">Análisis estadístico básico</p>
+                                </button>
+                            </div>
+                            <div class="col-md-4">
+                                <button class="btn btn-outline-success btn-lg w-100 report-btn" onclick="generarInformeTradicional('detallado')">
+                                    <div class="report-icon">
+                                        <i class="fas fa-file-alt fa-3x mb-3"></i>
+                                    </div>
+                                    <h6 class="report-title">Detallado</h6>
+                                    <p class="report-description">Análisis completo tradicional</p>
+                                </button>
+                            </div>
+                            <div class="col-md-4">
+                                <button class="btn btn-outline-info btn-lg w-100 report-btn" onclick="generarInformeTradicional('ejecutivo')">
+                                    <div class="report-icon">
+                                        <i class="fas fa-briefcase fa-3x mb-3"></i>
+                                    </div>
+                                    <h6 class="report-title">Ejecutivo</h6>
+                                    <p class="report-description">Resumen ejecutivo tradicional</p>
+                                </button>
+                            </div>
                         </div>
-                        <div class="col-md-4">
-                            <button class="btn btn-success btn-lg w-100 report-btn" onclick="generarInformeEspecifico('detallado')">
-                                <div class="report-icon">
-                                    <i class="fas fa-list-alt fa-3x mb-3"></i>
-                                </div>
-                                <h6 class="report-title">Informe Detallado</h6>
-                                <p class="report-description">Análisis completo con datos desagregados</p>
-                            </button>
-                        </div>
-                        <div class="col-md-4">
-                            <button class="btn btn-info btn-lg w-100 report-btn" onclick="generarInformeEspecifico('ejecutivo')">
-                                <div class="report-icon">
-                                    <i class="fas fa-briefcase fa-3x mb-3"></i>
-                                </div>
-                                <h6 class="report-title">Resumen Ejecutivo</h6>
-                                <p class="report-description">Resumen conciso para toma de decisiones</p>
-                            </button>
+                    </div>
+
+                    <!-- Informes Inteligentes con IA -->
+                    <div class="mb-4">
+                        <h6 class="text-warning mb-3 text-start">
+                            <i class="fas fa-brain me-2"></i>Informes Inteligentes con IA
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <button class="btn btn-warning btn-lg w-100 report-btn" onclick="generarInformeEspecifico('estadistico')">
+                                    <div class="report-icon">
+                                        <i class="fas fa-robot fa-3x mb-3"></i>
+                                    </div>
+                                    <h6 class="report-title">Estadístico IA</h6>
+                                    <p class="report-description">Análisis estadístico con insights inteligentes</p>
+                                </button>
+                            </div>
+                            <div class="col-md-4">
+                                <button class="btn btn-danger btn-lg w-100 report-btn" onclick="generarInformeEspecifico('detallado')">
+                                    <div class="report-icon">
+                                        <i class="fas fa-brain fa-3x mb-3"></i>
+                                    </div>
+                                    <h6 class="report-title">Detallado IA</h6>
+                                    <p class="report-description">Análisis profundo con NLP y correlaciones</p>
+                                </button>
+                            </div>
+                            <div class="col-md-4">
+                                <button class="btn btn-dark btn-lg w-100 report-btn" onclick="generarInformeEspecifico('ejecutivo')">
+                                    <div class="report-icon">
+                                        <i class="fas fa-magic fa-3x mb-3"></i>
+                                    </div>
+                                    <h6 class="report-title">Ejecutivo IA</h6>
+                                    <p class="report-description">Dashboard ejecutivo con recomendaciones inteligentes</p>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -268,6 +310,70 @@ async function generarInformeEspecifico(tipo) {
     } catch (error) {
         console.error('Error:', error);
         mostrarAlerta('Error al generar el informe: ' + error.message, 'danger');
+    } finally {
+        document.getElementById('loadingInforme').style.display = 'none';
+    }
+}
+
+// Función para generar informes tradicionales (sin IA)
+async function generarInformeTradicional(tipo) {
+    // Mostrar loader
+    document.getElementById('loadingInforme').style.display = 'block';
+    
+    try {
+        let url;
+        if (tipo === 'estadistico') {
+            url = '/api/generar_informe_tradicional_estadistico';
+        } else if (tipo === 'detallado') {
+            url = '/api/generar_informe_tradicional_detallado';
+        } else if (tipo === 'ejecutivo') {
+            url = '/api/generar_informe_tradicional_ejecutivo';
+        }
+        
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        
+        if (response.ok) {
+            const contentType = response.headers.get('content-type');
+            
+            // Si es un archivo descargable
+            if (contentType && contentType.includes('application/pdf')) {
+                const blob = await response.blob();
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                
+                a.download = `informe_tradicional_${tipo}_${new Date().toISOString().split('T')[0]}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(downloadUrl);
+                document.body.removeChild(a);
+                
+                // Agregar al historial
+                agregarAlHistorial(`${tipo} (Tradicional)`, 'pdf');
+                
+                mostrarAlerta('Informe tradicional generado exitosamente', 'success');
+            } else {
+                // Si es una respuesta JSON
+                const data = await response.json();
+                if (data.mensaje) {
+                    mostrarAlerta(data.mensaje, 'info');
+                } else {
+                    mostrarAlerta('Informe procesado correctamente', 'success');
+                }
+            }
+        } else {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
+        }
+        
+    } catch (error) {
+        console.error('Error:', error);
+        mostrarAlerta('Error al generar el informe tradicional: ' + error.message, 'danger');
     } finally {
         document.getElementById('loadingInforme').style.display = 'none';
     }
