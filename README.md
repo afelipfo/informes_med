@@ -328,13 +328,6 @@ campos_semanticos = {
 **modulos/generador_inteligente.py**: Generador de informes con IA
 **modulos/georreferenciacion.py**: Procesamiento geoespacial
 
-### Testing
-
-```bash
-# Ejecutar tests (cuando estén disponibles)
-python -m pytest tests/
-```
-
 ### Estándares de Código
 
 - PEP 8 para estilo Python
