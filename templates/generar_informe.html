@@ -7,6 +7,54 @@
     #barraProgreso {
         width: 0%;
     }
+    .report-btn {
+        min-height: 160px;
+        padding: 20px;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+    .report-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .report-icon {
+        margin-bottom: 10px;
+    }
+    .report-title {
+        font-weight: bold;
+        margin-bottom: 8px;
+    }
+    .report-description {
+        font-size: 0.85rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+    .config-card, .history-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+    }
+    .config-header, .history-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px 15px 0 0 !important;
+        padding: 20px;
+        border: none;
+    }
+    .config-body {
+        padding: 30px;
+    }
+    .history-body {
+        padding: 20px;
+    }
+    .loading-spinner {
+        background: rgba(255,255,255,0.9);
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px auto;
+        max-width: 300px;
+    }
 </style>
 {% endblock %}
 
@@ -25,123 +73,44 @@
         </div>
     </div>
 
-    <!-- Selector de tipo de informe -->
+    <!-- Generación de Informes -->
     <div class="row justify-content-center mb-5">
-        <div class="col-lg-10">
-            <div class="report-selector-card">
-                <div class="report-selector-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-clipboard-list me-2"></i>Seleccionar Tipo de Informe
-                    </h5>
-                </div>
-                <div class="report-selector-body">
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <input type="radio" class="btn-check" name="tipoInforme" id="estadistico" value="estadistico" checked>
-                            <label class="btn btn-outline-primary w-100 h-100 report-option" for="estadistico">
-                                <div class="report-icon">
-                                    <i class="fas fa-chart-bar"></i>
-                                </div>
-                                <h6 class="report-title">Informe Estadístico</h6>
-                                <p class="report-description">Resumen estadístico con gráficos y métricas clave</p>
-                            </label>
-                        </div>
-                        <div class="col-md-4">
-                            <input type="radio" class="btn-check" name="tipoInforme" id="detallado" value="detallado">
-                            <label class="btn btn-outline-primary w-100 h-100 report-option" for="detallado">
-                                <div class="report-icon">
-                                    <i class="fas fa-list-alt"></i>
-                                </div>
-                                <h6 class="report-title">Informe Detallado</h6>
-                                <p class="report-description">Análisis completo con datos desagregados por actividad</p>
-                            </label>
-                        </div>
-                        <div class="col-md-4">
-                            <input type="radio" class="btn-check" name="tipoInforme" id="ejecutivo" value="ejecutivo">
-                            <label class="btn btn-outline-primary w-100 h-100 report-option" for="ejecutivo">
-                                <div class="report-icon">
-                                    <i class="fas fa-briefcase"></i>
-                                </div>
-                                <h6 class="report-title">Resumen Ejecutivo</h6>
-                                <p class="report-description">Resumen conciso para toma de decisiones gerenciales</p>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Configuración de informes -->
-    <div class="row justify-content-center">
         <div class="col-lg-10">
             <div class="config-card">
                 <div class="config-header">
                     <h5 class="mb-0">
-                        <i class="fas fa-download me-2"></i>Generar Informes
+                        <i class="fas fa-download me-2"></i>Generar Informes PDF
                     </h5>
                 </div>
                 <div class="config-body text-center">
                     <div class="row g-3">
                         <div class="col-md-4">
-                            <button class="btn btn-primary btn-lg w-100 h-100" onclick="generarInformeEspecifico('estadistico')" style="min-height: 120px;">
-                                <i class="fas fa-chart-bar fa-2x mb-2 d-block"></i>
-                                <span class="fw-bold d-block">Generar Estadístico</span>
-                                <small class="text-light">PDF con gráficos y métricas</small>
+                            <button class="btn btn-primary btn-lg w-100 report-btn" onclick="generarInformeEspecifico('estadistico')">
+                                <div class="report-icon">
+                                    <i class="fas fa-chart-bar fa-3x mb-3"></i>
+                                </div>
+                                <h6 class="report-title">Informe Estadístico</h6>
+                                <p class="report-description">Resumen estadístico con gráficos y métricas clave</p>
                             </button>
                         </div>
                         <div class="col-md-4">
-                            <button class="btn btn-success btn-lg w-100 h-100" onclick="generarInformeEspecifico('detallado')" style="min-height: 120px;">
-                                <i class="fas fa-list-alt fa-2x mb-2 d-block"></i>
-                                <span class="fw-bold d-block">Generar Detallado</span>
-                                <small class="text-light">PDF con análisis completo</small>
+                            <button class="btn btn-success btn-lg w-100 report-btn" onclick="generarInformeEspecifico('detallado')">
+                                <div class="report-icon">
+                                    <i class="fas fa-list-alt fa-3x mb-3"></i>
+                                </div>
+                                <h6 class="report-title">Informe Detallado</h6>
+                                <p class="report-description">Análisis completo con datos desagregados</p>
                             </button>
                         </div>
                         <div class="col-md-4">
-                            <button class="btn btn-info btn-lg w-100 h-100" onclick="generarInformeEspecifico('ejecutivo')" style="min-height: 120px;">
-                                <i class="fas fa-briefcase fa-2x mb-2 d-block"></i>
-                                <span class="fw-bold d-block">Generar Ejecutivo</span>
-                                <small class="text-light">PDF resumen ejecutivo</small>
+                            <button class="btn btn-info btn-lg w-100 report-btn" onclick="generarInformeEspecifico('ejecutivo')">
+                                <div class="report-icon">
+                                    <i class="fas fa-briefcase fa-3x mb-3"></i>
+                                </div>
+                                <h6 class="report-title">Resumen Ejecutivo</h6>
+                                <p class="report-description">Resumen conciso para toma de decisiones</p>
                             </button>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Historial de Informes -->
-    <div class="row justify-content-center mt-5">
-        <div class="col-lg-10">
-            <div class="history-card">
-                <div class="history-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-history me-2"></i>Historial de Informes
-                    </h5>
-                    <button class="btn btn-outline-secondary btn-sm" onclick="limpiarHistorial()">
-                        <i class="fas fa-trash me-1"></i>Limpiar Historial
-                    </button>
-                </div>
-                <div class="history-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Tipo de Informe</th>
-                                    <th>Formato</th>
-                                    <th>Fecha de Generación</th>
-                                    <th>Configuración</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="historialTableBody">
-                                <!-- Contenido dinámico -->
-                            </tbody>
-                        </table>
-                    </div>
-                    <div id="historialEmpty" class="text-center py-4 history-empty">
-                        <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
-                        <h6 class="text-muted">No hay informes generados</h6>
-                        <p class="text-muted">Los informes que genere aparecerán aquí para su gestión</p>
                     </div>
                 </div>
             </div>
@@ -156,27 +125,39 @@
         <p class="mt-2">Generando informe, por favor espere...</p>
     </div>
 
-    <!-- Historial de informes -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
+    <!-- Historial de Informes -->
+    <div class="row justify-content-center mt-5">
+        <div class="col-lg-10">
+            <div class="history-card">
+                <div class="history-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">
-                        <i class="fas fa-history text-primary"></i>
-                        Historial de Informes Generados
+                        <i class="fas fa-history me-2"></i>Historial de Informes
                     </h5>
-                    <button class="btn btn-outline-danger btn-sm" onclick="limpiarHistorial()">
-                        <i class="fas fa-trash"></i>
-                        Limpiar Historial
+                    <button class="btn btn-light btn-sm" onclick="limpiarHistorial()">
+                        <i class="fas fa-trash me-1"></i>Limpiar Historial
                     </button>
                 </div>
-                <div class="card-body">
-                    <div id="historialInformes">
-                        <div class="text-center text-muted py-3">
-                            <i class="fas fa-file fa-2x mb-2"></i>
-                            <p>No hay informes generados aún</p>
-                            <small>Los informes generados aparecerán aquí para su descarga</small>
-                        </div>
+                <div class="history-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Tipo de Informe</th>
+                                    <th>Formato</th>
+                                    <th>Fecha de Generación</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historialTableBody">
+                                <!-- Contenido dinámico -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="historialEmpty" class="text-center py-4 history-empty">
+                        <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                        <h6 class="text-muted">No hay informes generados</h6>
+                        <p class="text-muted">Los informes que genere aparecerán aquí para su gestión</p>
                     </div>
                 </div>
             </div>
@@ -407,21 +388,28 @@ async function simularProgreso() {
 
 // Agregar informe al historial
 function agregarAlHistorial(tipo, formato) {
-    const fecha = new Date().toLocaleString('es-CO');
+    const fecha = new Date().toLocaleString('es-CO', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
     const historial = JSON.parse(localStorage.getItem('historialInformes') || '[]');
     
     historial.unshift({
         id: Date.now(),
         tipo: tipo,
         formato: formato,
-        fecha: fecha
+        fecha: fecha,
+        estado: 'Completado'
     });
     
     // Mantener solo los últimos 10 informes
     historial.splice(10);
     
     localStorage.setItem('historialInformes', JSON.stringify(historial));
-    mostrarHistorial(historial);
+    cargarHistorial();
 }
 
 // Cargar y mostrar historial
@@ -429,6 +417,11 @@ function cargarHistorial() {
     const historial = JSON.parse(localStorage.getItem('historialInformes') || '[]');
     const tableBody = document.getElementById('historialTableBody');
     const emptyState = document.getElementById('historialEmpty');
+    
+    if (!tableBody || !emptyState) {
+        console.error('Elementos del historial no encontrados');
+        return;
+    }
     
     if (historial.length === 0) {
         tableBody.innerHTML = '';
@@ -442,18 +435,18 @@ function cargarHistorial() {
         <tr>
             <td>
                 <div class="d-flex align-items-center">
-                    <i class="fas fa-file-${item.formato === 'pdf' ? 'pdf text-danger' : 'excel text-success'} me-2"></i>
+                    <i class="fas fa-file-pdf text-danger me-2"></i>
                     <span class="fw-semibold">${capitalizar(item.tipo)}</span>
                 </div>
             </td>
             <td>
-                <span class="badge bg-${item.formato === 'pdf' ? 'danger' : 'success'}">${item.formato.toUpperCase()}</span>
+                <span class="badge bg-danger">${item.formato.toUpperCase()}</span>
             </td>
             <td>
                 <small class="text-muted">${item.fecha}</small>
             </td>
             <td>
-                <small class="text-muted">${item.configuracion || 'Configuración por defecto'}</small>
+                <span class="badge bg-success">${item.estado}</span>
             </td>
             <td>
                 <div class="btn-group" role="group">
