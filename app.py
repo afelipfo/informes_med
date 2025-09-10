@@ -322,54 +322,16 @@ def crear_aplicacion():
 
     @app.route('/api/generar_informe_estadistico')
     def api_generar_informe_estadistico():
-        """Generar informe estadístico en formato PDF"""
+        """Generar informe estadístico con análisis inteligente en formato PDF"""
         if app.datos_cargados is None:
             return jsonify({'error': 'No hay datos cargados'}), 400
         
         try:
-            from modulos.analisis import AnalisisSurvey123
-            from reportlab.pdfgen import canvas
-            from reportlab.lib.pagesizes import letter
-            from io import BytesIO
+            from modulos.generadores_pdf import InformeEstadistico
             
-            analizador = AnalisisSurvey123(app.datos_cargados)
-            analisis = analizador.generar_analisis_completo()
-            
-            # Crear PDF en memoria
-            buffer = BytesIO()
-            p = canvas.Canvas(buffer, pagesize=letter)
-            width, height = letter
-            
-            # Título
-            p.setFont("Helvetica-Bold", 16)
-            p.drawString(50, height - 50, "Informe Estadístico - Survey123")
-            
-            # Información básica
-            y_position = height - 100
-            p.setFont("Helvetica", 12)
-            
-            if 'metadata' in analisis:
-                metadata = analisis['metadata']
-                p.drawString(50, y_position, f"Total de registros: {metadata.get('total_registros', 0)}")
-                y_position -= 20
-                p.drawString(50, y_position, f"Columnas analizadas: {metadata.get('columnas_analizadas', 0)}")
-                y_position -= 20
-            
-            if 'recursos_humanos' in analisis:
-                rh = analisis['recursos_humanos']
-                y_position -= 20
-                p.drawString(50, y_position, f"Total trabajadores: {rh.get('total_trabajadores', 0)}")
-                y_position -= 20
-                p.drawString(50, y_position, f"Total horas trabajadas: {rh.get('total_horas_trabajadas', 0):.1f}")
-                y_position -= 20
-            
-            # Agregar fecha de generación
-            p.drawString(50, y_position - 40, f"Generado: {datetime.now().strftime('%d/%m/%Y %H:%M')}")
-            
-            p.showPage()
-            p.save()
-            
-            buffer.seek(0)
+            # Generar informe con AI
+            generador = InformeEstadistico(app.datos_cargados)
+            buffer = generador.generar_pdf()
             
             return send_file(
                 buffer,
@@ -384,97 +346,17 @@ def crear_aplicacion():
 
     @app.route('/api/generar_informe_detallado/<formato>')
     def api_generar_informe_detallado(formato):
-        """Generar informe detallado en PDF o Excel"""
+        """Generar informe detallado con análisis exhaustivo"""
         if app.datos_cargados is None:
             return jsonify({'error': 'No hay datos cargados'}), 400
         
         try:
-            if formato.lower() == 'excel':
-                # Crear archivo Excel con múltiples hojas
-                from io import BytesIO
-                output = BytesIO()
+            if formato.lower() == 'pdf':
+                from modulos.generadores_pdf import InformeDetallado
                 
-                with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                    # Hoja principal con datos
-                    app.datos_cargados.to_excel(writer, sheet_name='Datos', index=False)
-                    
-                    # Hoja de resumen
-                    estadisticas = app.repositorio.obtener_estadisticas()
-                    resumen_df = pd.DataFrame([
-                        {'Métrica': 'Total de Registros', 'Valor': len(app.datos_cargados)},
-                        {'Métrica': 'Total de Puntos Únicos', 'Valor': app.datos_cargados['id_punto'].nunique()},
-                        {'Métrica': 'Total de Trabajadores', 'Valor': app.datos_cargados['num_total_'].sum()},
-                        {'Métrica': 'Total de Horas Trabajadas', 'Valor': app.datos_cargados['total_hora'].sum()}
-                    ])
-                    resumen_df.to_excel(writer, sheet_name='Resumen', index=False)
-                
-                output.seek(0)
-                
-                return send_file(
-                    output,
-                    as_attachment=True,
-                    download_name=f'informe_survey123_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx',
-                    mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-                )
-            
-            elif formato.lower() == 'pdf':
-                from reportlab.pdfgen import canvas
-                from reportlab.lib.pagesizes import letter
-                from reportlab.lib.styles import getSampleStyleSheet
-                from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
-                from reportlab.lib import colors
-                from io import BytesIO
-                
-                # Crear PDF en memoria
-                buffer = BytesIO()
-                doc = SimpleDocTemplate(buffer, pagesize=letter)
-                styles = getSampleStyleSheet()
-                story = []
-                
-                # Título
-                title = Paragraph("INFORME DETALLADO - SURVEY123", styles['Title'])
-                story.append(title)
-                story.append(Spacer(1, 20))
-                
-                # Información general
-                from modulos.analisis import AnalisisSurvey123
-                analizador = AnalisisSurvey123(app.datos_cargados)
-                analisis = analizador.generar_analisis_completo()
-                
-                # Metadata
-                if 'metadata' in analisis:
-                    metadata = analisis['metadata']
-                    metadata_text = f"""
-                    <b>INFORMACIÓN GENERAL:</b><br/>
-                    • Total de registros: {metadata.get('total_registros', 0)}<br/>
-                    • Columnas analizadas: {metadata.get('columnas_analizadas', 0)}<br/>
-                    • Fecha de procesamiento: {datetime.now().strftime('%d/%m/%Y %H:%M')}<br/><br/>
-                    """
-                    story.append(Paragraph(metadata_text, styles['Normal']))
-                
-                # Recursos Humanos
-                if 'recursos_humanos' in analisis:
-                    rh = analisis['recursos_humanos']
-                    rh_text = f"""
-                    <b>RECURSOS HUMANOS:</b><br/>
-                    • Total trabajadores: {rh.get('total_trabajadores', 0)}<br/>
-                    • Total horas trabajadas: {rh.get('total_horas_trabajadas', 0):.1f}<br/>
-                    • Promedio horas por registro: {rh.get('promedio_horas_registro', 0):.2f}<br/><br/>
-                    """
-                    story.append(Paragraph(rh_text, styles['Normal']))
-                
-                # Actividades
-                if 'actividades' in analisis:
-                    actividades = analisis['actividades']
-                    act_text = "<b>ACTIVIDADES PRINCIPALES:</b><br/>"
-                    for actividad, datos in actividades.items():
-                        if isinstance(datos, dict) and 'cantidad' in datos:
-                            act_text += f"• {actividad}: {datos['cantidad']} registros<br/>"
-                    story.append(Paragraph(act_text, styles['Normal']))
-                
-                # Construir el PDF
-                doc.build(story)
-                buffer.seek(0)
+                # Generar informe detallado con AI
+                generador = InformeDetallado(app.datos_cargados)
+                buffer = generador.generar_pdf()
                 
                 return send_file(
                     buffer,
@@ -482,9 +364,8 @@ def crear_aplicacion():
                     download_name=f'informe_detallado_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf',
                     mimetype='application/pdf'
                 )
-            
             else:
-                return jsonify({'error': 'Formato no soportado. Use "excel" o "pdf"'}), 400
+                return jsonify({'error': 'Solo se soporta formato PDF para informe detallado'}), 400
                 
         except Exception as e:
             app.logger.error(f"Error generando informe detallado: {str(e)}")
@@ -559,57 +440,16 @@ def crear_aplicacion():
 
     @app.route('/api/generar_informe_ejecutivo')
     def api_generar_informe_ejecutivo():
-        """Generar resumen ejecutivo en formato PDF"""
+        """Generar resumen ejecutivo estratégico en formato PDF"""
         if app.datos_cargados is None:
             return jsonify({'error': 'No hay datos cargados'}), 400
         
         try:
-            from reportlab.pdfgen import canvas
-            from reportlab.lib.pagesizes import letter
-            from reportlab.lib.styles import getSampleStyleSheet
-            from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-            from io import BytesIO
+            from modulos.generadores_pdf import ResumenEjecutivo
             
-            # Crear PDF en memoria
-            buffer = BytesIO()
-            doc = SimpleDocTemplate(buffer, pagesize=letter)
-            styles = getSampleStyleSheet()
-            story = []
-            
-            # Título
-            title = Paragraph("RESUMEN EJECUTIVO - SURVEY123", styles['Title'])
-            story.append(title)
-            story.append(Spacer(1, 20))
-            
-            # Resumen de datos
-            total_registros = len(app.datos_cargados)
-            total_trabajadores = app.datos_cargados['num_total_'].sum() if 'num_total_' in app.datos_cargados.columns else 0
-            total_horas = app.datos_cargados['total_hora'].sum() if 'total_hora' in app.datos_cargados.columns else 0
-            
-            # Información básica
-            summary_text = f"""
-            <b>DATOS GENERALES:</b><br/>
-            • Total de registros procesados: {total_registros}<br/>
-            • Total de trabajadores involucrados: {int(total_trabajadores)}<br/>
-            • Total de horas trabajadas: {total_horas:.1f}<br/>
-            • Puntos geográficos únicos: {app.datos_cargados['id_punto'].nunique() if 'id_punto' in app.datos_cargados.columns else 'N/A'}<br/><br/>
-            
-            <b>DISTRIBUCIÓN POR ESTADO:</b><br/>
-            """
-            
-            if 'estado_obr' in app.datos_cargados.columns:
-                estados = app.datos_cargados['estado_obr'].value_counts()
-                for estado, cantidad in estados.items():
-                    summary_text += f"• {estado}: {cantidad} registros<br/>"
-            
-            summary_text += f"<br/><b>FECHA DE GENERACIÓN:</b> {datetime.now().strftime('%d/%m/%Y %H:%M')}"
-            
-            summary_para = Paragraph(summary_text, styles['Normal'])
-            story.append(summary_para)
-            
-            # Construir el PDF
-            doc.build(story)
-            buffer.seek(0)
+            # Generar resumen ejecutivo con AI
+            generador = ResumenEjecutivo(app.datos_cargados)
+            buffer = generador.generar_pdf()
             
             return send_file(
                 buffer,
