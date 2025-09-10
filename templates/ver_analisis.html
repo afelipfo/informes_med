@@ -2,6 +2,18 @@
 
 {% block title %}Análisis de Datos{% endblock %}
 
+{% block head %}
+<style>
+    .progress-high {
+        height: 30px;
+    }
+    .progress-bar-text {
+        font-size: 14px;
+        padding-top: 5px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid py-4">
     <!-- Encabezado -->
@@ -904,11 +916,10 @@
                             </h5>
                         </div>
                         <div class="card-body">
-                            <div class="progress mb-3" style="height: 30px;">
-                                <div class="progress-bar bg-success" role="progressbar" 
+                            <div class="progress mb-3 progress-high">
+                                <div class="progress-bar bg-success progress-bar-text" role="progressbar" 
                                      data-width="{{ estadisticas.actividades_construccion.cobertura_actividades.porcentaje_cobertura }}"
-                                     aria-label="Cobertura de actividades"
-                                     style="font-size: 14px; padding-top: 5px;">
+                                     aria-label="Cobertura de actividades">
                                     {{ "%.1f"|format(estadisticas.actividades_construccion.cobertura_actividades.porcentaje_cobertura) }}%
                                 </div>
                             </div>

@@ -55,6 +55,9 @@
         margin: 20px auto;
         max-width: 300px;
     }
+    .loading-spinner.hidden {
+        display: none;
+    }
 </style>
 {% endblock %}
 
@@ -86,7 +89,7 @@
                     <!-- Informes Tradicionales -->
                     <div class="mb-4">
                         <h6 class="text-muted mb-3 text-start">
-                            <i class="fas fa-chart-bar me-2"></i>Informes Tradicionales
+                            <i class="fas fa-chart-bar me-2"></i>Informes
                         </h6>
                         <div class="row g-3">
                             <div class="col-md-4">
@@ -122,7 +125,7 @@
                     <!-- Informes Inteligentes con IA -->
                     <div class="mb-4">
                         <h6 class="text-warning mb-3 text-start">
-                            <i class="fas fa-brain me-2"></i>Informes Inteligentes con IA
+                            <i class="fas fa-brain me-2"></i>Informes Inteligentes
                         </h6>
                         <div class="row g-3">
                             <div class="col-md-4">
@@ -160,7 +163,7 @@
     </div>
 
     <!-- Loader durante generación -->
-    <div class="text-center mt-4 loading-spinner" id="loadingInforme" style="display: none;">
+    <div class="text-center mt-4 loading-spinner hidden" id="loadingInforme">
         <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Generando informe...</span>
         </div>
@@ -251,10 +254,19 @@ document.addEventListener('DOMContentLoaded', function() {
     cargarHistorial();
 });
 
+// Funciones helper para el loader
+function mostrarLoader() {
+    document.getElementById('loadingInforme').classList.remove('hidden');
+}
+
+function ocultarLoader() {
+    document.getElementById('loadingInforme').classList.add('hidden');
+}
+
 // Función específica para generar informes desde los botones
 async function generarInformeEspecifico(tipo) {
     // Mostrar loader
-    document.getElementById('loadingInforme').style.display = 'block';
+    mostrarLoader();
     
     try {
         let url;
@@ -311,14 +323,14 @@ async function generarInformeEspecifico(tipo) {
         console.error('Error:', error);
         mostrarAlerta('Error al generar el informe: ' + error.message, 'danger');
     } finally {
-        document.getElementById('loadingInforme').style.display = 'none';
+        ocultarLoader();
     }
 }
 
 // Función para generar informes tradicionales (sin IA)
 async function generarInformeTradicional(tipo) {
     // Mostrar loader
-    document.getElementById('loadingInforme').style.display = 'block';
+    mostrarLoader();
     
     try {
         let url;
@@ -375,7 +387,7 @@ async function generarInformeTradicional(tipo) {
         console.error('Error:', error);
         mostrarAlerta('Error al generar el informe tradicional: ' + error.message, 'danger');
     } finally {
-        document.getElementById('loadingInforme').style.display = 'none';
+        ocultarLoader();
     }
 }
 
