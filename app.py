@@ -442,7 +442,28 @@ def crear_aplicacion():
             flash('No hay datos cargados. Por favor, cargue un archivo primero.', 'warning')
             return redirect(url_for('cargar_datos'))
         
-        return render_template('mapa_intervenciones.html')
+        try:
+            # Calcular estadísticas para el template
+            df = app.datos_cargados
+            
+            # Contar por estado
+            total_intervenciones = len(df)
+            terminadas = len(df[df['estado_obr'].str.contains('Terminada', case=False, na=False)])
+            en_ejecucion = len(df[df['estado_obr'].str.contains('ejecucion|proceso', case=False, na=False)])
+            pendientes = len(df[df['estado_obr'].str.contains('Pendiente', case=False, na=False)])
+            
+            return render_template('mapa_intervenciones.html',
+                                 total_intervenciones=total_intervenciones,
+                                 terminadas=terminadas,
+                                 en_ejecucion=en_ejecucion,
+                                 pendientes=pendientes)
+        except Exception as e:
+            app.logger.error(f"Error calculando estadísticas: {str(e)}")
+            return render_template('mapa_intervenciones.html',
+                                 total_intervenciones=0,
+                                 terminadas=0,
+                                 en_ejecucion=0,
+                                 pendientes=0)
 
     @app.route('/api/datos_mapa')
     def api_datos_mapa():

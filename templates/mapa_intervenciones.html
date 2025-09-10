@@ -12,9 +12,81 @@
     .hidden-panel {
         display: none;
     }
-    .hidden-section {
-        display: none;
+    .sidebar-panel {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        overflow: hidden;
     }
+    .sidebar-header {
+        background: var(--primary-color);
+        color: white;
+        padding: 15px 20px;
+        font-weight: 600;
+    }
+    .sidebar-body {
+        padding: 20px;
+    }
+    .map-panel {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    .map-header {
+        background: var(--primary-color);
+        color: white;
+        padding: 15px 20px;
+    }
+    .map-body {
+        padding: 0;
+    }
+    .stat-mini {
+        text-align: center;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border-left: 4px solid var(--primary-color);
+    }
+    .stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: var(--primary-color);
+    }
+    .stat-label {
+        font-size: 0.85rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .filter-group {
+        margin-bottom: 15px;
+    }
+    .filter-actions {
+        margin-top: 20px;
+    }
+    .legend-items {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .legend-color {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 2px solid white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .legend-color.terminada { background-color: #28a745; }
+    .legend-color.en-ejecucion { background-color: #007bff; }
+    .legend-color.pendiente { background-color: #dc3545; }
+    .legend-color.suspendida { background-color: #6c757d; }
 </style>
 {% endblock %}
 
@@ -44,11 +116,11 @@
                             <i class="fas fa-globe me-2"></i>Vista Interactiva
                         </h5>
                         <div class="map-controls">
-                            <button class="btn btn-outline-primary btn-sm me-2" onclick="toggleVistaLista()">
-                                <i class="fas fa-list me-1"></i>Vista Lista
+                            <button class="btn btn-outline-light btn-sm me-2" onclick="centrarMapa()">
+                                <i class="fas fa-crosshairs me-1"></i>Centrar
                             </button>
-                            <button class="btn btn-outline-secondary btn-sm" onclick="configurarVista()">
-                                <i class="fas fa-cog me-1"></i>Configurar Vista
+                            <button class="btn btn-outline-light btn-sm" onclick="exportarMapa()">
+                                <i class="fas fa-download me-1"></i>Exportar
                             </button>
                         </div>
                     </div>
@@ -62,7 +134,7 @@
         <!-- Barra lateral (1/3) -->
         <div class="col-lg-4">
             <!-- Estadísticas rápidas -->
-            <div class="sidebar-panel mb-4">
+            <div class="sidebar-panel">
                 <div class="sidebar-header">
                     <h6 class="mb-0">
                         <i class="fas fa-chart-pie me-2"></i>Estadísticas Rápidas
@@ -95,11 +167,24 @@
                             </div>
                         </div>
                     </div>
+                    <div class="mt-3">
+                        <div class="d-flex justify-content-between">
+                            <small class="text-muted">Total Puntos:</small>
+                            <small class="fw-bold" id="totalPuntos">0</small>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <small class="text-muted">Visibles:</small>
+                            <small class="fw-bold" id="puntosVisibles">0</small>
+                        </div>
+                    </div>
+                    <div id="estadisticasDetalle" class="mt-3">
+                        <!-- Se llenará dinámicamente -->
+                    </div>
                 </div>
             </div>
 
             <!-- Filtros -->
-            <div class="sidebar-panel mb-4">
+            <div class="sidebar-panel">
                 <div class="sidebar-header">
                     <h6 class="mb-0">
                         <i class="fas fa-filter me-2"></i>Filtros
@@ -111,17 +196,17 @@
                         <label for="filtroEstado" class="form-label">Estado</label>
                         <select class="form-select form-select-sm" id="filtroEstado" onchange="aplicarFiltroMapa()">
                             <option value="">Todos los estados</option>
-                            <option value="terminado">Terminado</option>
-                            <option value="en_ejecucion">En Ejecución</option>
-                            <option value="pendiente">Pendiente</option>
-                            <option value="suspendido">Suspendido</option>
+                            <option value="Terminada">Terminada</option>
+                            <option value="En ejecucion">En Ejecución</option>
+                            <option value="En proceso">En proceso</option>
+                            <option value="Pendiente">Pendiente</option>
                         </select>
                     </div>
 
                     <!-- Intervenor -->
                     <div class="filter-group">
-                        <label for="filtroIntervenor" class="form-label">Intervenor</label>
-                        <select class="form-select form-select-sm" id="filtroIntervenor" onchange="aplicarFiltroMapa()">
+                        <label for="filtroInterventor" class="form-label">Intervenor</label>
+                        <select class="form-select form-select-sm" id="filtroInterventor" onchange="aplicarFiltroMapa()">
                             <option value="">Todos los interventores</option>
                         </select>
                     </div>
@@ -176,223 +261,15 @@
                 </div>
             </div>
 
-            <!-- Botón de exportar -->
-            <div class="text-center mt-4">
-                <button class="btn btn-outline-primary w-100" onclick="exportarMapa()">
-                    <i class="fas fa-download me-2"></i>Exportar Datos
-                </button>
-            </div>
-        </div>
-    </div>
-                                Configurar Vista
-                            </button>
-                            <button class="btn btn-outline-success btn-sm" onclick="exportarMapa()">
-                                <i class="fas fa-download"></i>
-                                Exportar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body" id="panelFiltros">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <select class="form-select form-select-sm" id="filtroEstado" onchange="aplicarFiltros()" title="Filtrar por estado de la obra">
-                                <option value="">Todos los estados</option>
-                                <option value="En ejecucion">En ejecución</option>
-                                <option value="Terminada">Terminada</option>
-                                <option value="En proceso">En proceso</option>
-                                <option value="Pendiente">Pendiente</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <select class="form-select form-select-sm" id="filtroComuna" onchange="aplicarFiltros()" title="Filtrar por interventor">
-                                <option value="">Todos los interventores</option>
-                                <!-- Opciones se cargarán dinámicamente -->
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <select class="form-select form-select-sm" id="tipoVisualizacion" onchange="cambiarVisualizacion()" title="Tipo de visualización del mapa">
-                                <option value="puntos">Puntos individuales</option>
-                                <option value="cluster">Agrupación (cluster)</option>
-                                <option value="heatmap">Mapa de calor</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="btn-group w-100" role="group">
-                                <button class="btn btn-outline-primary btn-sm" onclick="centrarMapa()" title="Centrar mapa">
-                                    <i class="fas fa-crosshairs"></i>
-                                </button>
-                                <button class="btn btn-outline-secondary btn-sm" onclick="toggleLeyenda()" title="Mostrar/ocultar leyenda">
-                                    <i class="fas fa-list"></i>
-                                </button>
-                                <button class="btn btn-outline-info btn-sm" onclick="verEstadisticas()" title="Ver estadísticas">
-                                    <i class="fas fa-chart-bar"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Contenedor principal del mapa -->
-    <div class="row">
-        <!-- Mapa -->
-        <div class="col-lg-9">
-            <div class="card">
-                <div class="card-body p-0">
-                    <div id="mapa" class="map-container"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Panel lateral con información -->
-        <div class="col-lg-3">
-            <!-- Estadísticas rápidas -->
-            <div class="card mb-3">
-                <div class="card-header">
-                    <h6 class="mb-0">
-                        <i class="fas fa-info-circle text-primary"></i>
-                        Estadísticas Rápidas
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <div class="row text-center">
-                        <div class="col-6 mb-2">
-                            <div class="border-end">
-                                <h4 class="text-primary mb-0" id="totalPuntos">0</h4>
-                                <small class="text-muted">Total Puntos</small>
-                            </div>
-                        </div>
-                        <div class="col-6 mb-2">
-                            <h4 class="text-success mb-0" id="puntosVisibles">0</h4>
-                            <small class="text-muted">Visibles</small>
-                        </div>
-                    </div>
-                    <hr>
-                    <div id="estadisticasDetalle">
-                        <small class="text-muted">Seleccione filtros para ver estadísticas detalladas</small>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Leyenda -->
-            <div class="card mb-3" id="leyendaCard">
-                <div class="card-header">
-                    <h6 class="mb-0">
-                        <i class="fas fa-map-pin text-primary"></i>
-                        Leyenda
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <div class="leyenda-item mb-2">
-                        <span class="badge bg-success me-2">●</span>
-                        <small>Terminada</small>
-                    </div>
-                    <div class="leyenda-item mb-2">
-                        <span class="badge bg-primary me-2">●</span>
-                        <small>En ejecución</small>
-                    </div>
-                    <div class="leyenda-item mb-2">
-                        <span class="badge bg-warning me-2">●</span>
-                        <small>En proceso</small>
-                    </div>
-                    <div class="leyenda-item mb-2">
-                        <span class="badge bg-danger me-2">●</span>
-                        <small>Pendiente</small>
-                    </div>
-                </div>
-            </div>
-
             <!-- Información del punto seleccionado -->
-            <div class="card hidden-panel" id="infoPunto">
-                <div class="card-header">
+            <div class="sidebar-panel hidden-panel" id="infoPunto">
+                <div class="sidebar-header">
                     <h6 class="mb-0">
-                        <i class="fas fa-map-marker-alt text-primary"></i>
-                        Información Detallada
+                        <i class="fas fa-map-marker-alt me-2"></i>Información Detallada
                     </h6>
                 </div>
-                <div class="card-body" id="contenidoInfoPunto">
+                <div class="sidebar-body" id="contenidoInfoPunto">
                     <!-- Se llenará dinámicamente -->
-                </div>
-            </div>
-
-            <!-- Lista de puntos cercanos -->
-            <div class="card mt-3 hidden-panel" id="puntosCercanos">
-                <div class="card-header">
-                    <h6 class="mb-0">
-                        <i class="fas fa-location-arrow text-primary"></i>
-                        Puntos Cercanos
-                    </h6>
-                </div>
-                <div class="card-body" id="listaPuntosCercanos">
-                    <!-- Se llenará dinámicamente -->
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal para configuración avanzada -->
-    <div class="modal fade" id="modalConfiguracion" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fas fa-cog"></i>
-                        Configuración Avanzada del Mapa
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" title="Cerrar configuración"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6>Capas del Mapa</h6>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="capaInterventions" checked>
-                                <label class="form-check-label" for="capaInterventions">
-                                    Intervenciones
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="capaComunas">
-                                <label class="form-check-label" for="capaComunas">
-                                    Límites de Comunas
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="capaBarrios">
-                                <label class="form-check-label" for="capaBarrios">
-                                    Límites de Barrios
-                                </label>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <h6>Estilo del Mapa Base</h6>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="estiloMapa" id="estiloOSM" value="osm" checked>
-                                <label class="form-check-label" for="estiloOSM">
-                                    OpenStreetMap
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="estiloMapa" id="estiloSatelite" value="satelite">
-                                <label class="form-check-label" for="estiloSatelite">
-                                    Vista Satelital
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="estiloMapa" id="estiloTerrain" value="terrain">
-                                <label class="form-check-label" for="estiloTerrain">
-                                    Relieve
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    <button type="button" class="btn btn-primary" onclick="aplicarConfiguracion()">Aplicar Cambios</button>
                 </div>
             </div>
         </div>
@@ -401,12 +278,13 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 // Variables globales
 let mapa;
 let grupoMarcadores;
 let datosPuntos = [];
-let modalConfiguracion;
+let interventoresCargados = [];
 
 // Configuración inicial
 const configMapa = {
@@ -426,24 +304,23 @@ const coloresPorEstado = {
 // Funciones auxiliares para manejo de paneles
 function showPanel(id) {
     const element = document.getElementById(id);
-    element.classList.remove('hidden-panel');
+    if (element) element.classList.remove('hidden-panel');
 }
 
 function hidePanel(id) {
     const element = document.getElementById(id);
-    element.classList.add('hidden-panel');
+    if (element) element.classList.add('hidden-panel');
 }
 
 // Inicialización cuando se carga el DOM
 document.addEventListener('DOMContentLoaded', function() {
     inicializarMapa();
     cargarDatos();
-    modalConfiguracion = new bootstrap.Modal(document.getElementById('modalConfiguracion'));
 });
 
 // Inicializar el mapa base
 function inicializarMapa() {
-    mapa = L.map('mapa').setView(configMapa.centro, configMapa.zoom);
+    mapa = L.map('map').setView(configMapa.centro, configMapa.zoom);
     
     // Capa base
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -465,22 +342,25 @@ async function cargarDatos() {
     try {
         mostrarCarga(true);
         
-        // Simular carga de datos - en implementación real sería una llamada a la API
         const response = await fetch('/api/datos_mapa');
         
         if (response.ok) {
             datosPuntos = await response.json();
+            console.log('Datos cargados:', datosPuntos.length, 'puntos');
         } else {
-            // Datos de prueba si no hay API
-            datosPuntos = generarDatosPrueba();
+            console.error('Error en la respuesta del servidor');
+            datosPuntos = [];
         }
+        
+        // Cargar interventores únicos para el filtro
+        cargarInterventores();
         
         actualizarMapa();
         actualizarEstadisticas();
         
     } catch (error) {
         console.error('Error cargando datos:', error);
-        datosPuntos = generarDatosPrueba();
+        datosPuntos = [];
         actualizarMapa();
         actualizarEstadisticas();
     } finally {
@@ -488,31 +368,21 @@ async function cargarDatos() {
     }
 }
 
-// Generar datos de prueba
-function generarDatosPrueba() {
-    const estados = ['Terminada', 'En ejecucion', 'En proceso', 'Pendiente'];
-    const datos = [];
+// Cargar lista de interventores para el filtro
+function cargarInterventores() {
+    const interventores = [...new Set(datosPuntos.map(p => p.nombre_interventor).filter(i => i))];
+    const select = document.getElementById('filtroInterventor');
     
-    for (let i = 0; i < 50; i++) {
-        // Coordenadas aleatorias en el área de Medellín
-        const lat = 6.2442 + (Math.random() - 0.5) * 0.2;
-        const lng = -75.5812 + (Math.random() - 0.5) * 0.3;
-        
-        datos.push({
-            id: i + 1,
-            lat: lat,
-            lng: lng,
-            estado: estados[Math.floor(Math.random() * estados.length)],
-            comuna: Math.floor(Math.random() * 10) + 1,
-            tipo_trabajo: 'Mantenimiento vial',
-            trabajadores: Math.floor(Math.random() * 20) + 1,
-            horas: Math.floor(Math.random() * 100) + 10,
-            fecha: '2025-09-08',
-            descripcion: `Intervención ${i + 1} en infraestructura urbana`
-        });
-    }
+    // Limpiar opciones existentes (excepto la primera)
+    select.innerHTML = '<option value="">Todos los interventores</option>';
     
-    return datos;
+    // Agregar interventores únicos
+    interventores.forEach(interventor => {
+        const option = document.createElement('option');
+        option.value = interventor;
+        option.textContent = interventor;
+        select.appendChild(option);
+    });
 }
 
 // Actualizar marcadores en el mapa
@@ -547,24 +417,22 @@ function crearMarcador(punto) {
         fillOpacity: 0.8
     });
     
-    // Popup
+    // Popup con información básica
     const popupContent = `
-        <div class="popup-content">
-            <h6><i class="fas fa-map-marker-alt"></i> ${punto.id_punto}</h6>
-            <p class="mb-1"><strong>Estado:</strong> <span class="badge" style="background-color: ${color}">${punto.estado_obra}</span></p>
+        <div style="min-width: 200px;">
+            <h6 class="mb-2">${punto.id_punto}</h6>
+            <p class="mb-1"><strong>Estado:</strong> ${punto.estado_obra}</p>
             <p class="mb-1"><strong>Interventor:</strong> ${punto.nombre_interventor}</p>
             <p class="mb-1"><strong>Trabajadores:</strong> ${punto.total_trabajadores}</p>
-            <p class="mb-1"><strong>Horas:</strong> ${punto.total_horas}</p>
-            <p class="mb-0"><small class="text-muted">Fecha: ${punto.fecha_diligenciamiento}</small></p>
+            <p class="mb-0"><strong>Horas:</strong> ${punto.total_horas}</p>
         </div>
     `;
     
     marcador.bindPopup(popupContent);
     
-    // Eventos
-    marcador.on('click', function(e) {
+    // Evento click para mostrar información detallada
+    marcador.on('click', function() {
         mostrarInfoPunto(punto);
-        L.DomEvent.stopPropagation(e);
     });
     
     return marcador;
@@ -573,27 +441,21 @@ function crearMarcador(punto) {
 // Aplicar filtros a los datos
 function aplicarFiltrosData() {
     const filtroEstado = document.getElementById('filtroEstado').value;
-    const filtroInterventor = document.getElementById('filtroComuna').value; // Reutilizamos el campo para interventores
+    const filtroInterventor = document.getElementById('filtroInterventor').value;
     
     return datosPuntos.filter(punto => {
-        let pasa = true;
-        
+        // Filtro por estado
         if (filtroEstado && punto.estado_obra !== filtroEstado) {
-            pasa = false;
+            return false;
         }
         
+        // Filtro por interventor
         if (filtroInterventor && punto.nombre_interventor !== filtroInterventor) {
-            pasa = false;
+            return false;
         }
         
-        return pasa;
+        return true;
     });
-}
-
-// Aplicar filtros (llamada desde UI)
-function aplicarFiltros() {
-    actualizarMapa();
-    actualizarEstadisticas();
 }
 
 // Actualizar estadísticas del panel lateral
@@ -615,28 +477,29 @@ function actualizarEstadisticas() {
     };
     
     document.getElementById('estadisticasDetalle').innerHTML = `
-        <div class="mb-2">
-            <small class="text-muted">Trabajadores:</small>
-            <div class="fw-bold">${estadisticas.totalTrabajadores.toLocaleString()}</div>
-        </div>
-        <div class="mb-2">
-            <small class="text-muted">Horas total:</small>
-            <div class="fw-bold">${estadisticas.totalHoras.toLocaleString()}</div>
-        </div>
-        <div class="mb-2">
-            <small class="text-muted">Estados diferentes:</small>
-            <div class="fw-bold">${estadisticas.estadosUnicos}</div>
-        </div>
-        <div>
-            <small class="text-muted">Interventores:</small>
-            <div class="fw-bold">${estadisticas.interventoresUnicos}</div>
+        <div class="row g-2">
+            <div class="col-6">
+                <small class="text-muted">Trabajadores:</small>
+                <div class="fw-bold">${estadisticas.totalTrabajadores.toLocaleString()}</div>
+            </div>
+            <div class="col-6">
+                <small class="text-muted">Horas total:</small>
+                <div class="fw-bold">${estadisticas.totalHoras.toLocaleString()}</div>
+            </div>
+            <div class="col-6">
+                <small class="text-muted">Estados:</small>
+                <div class="fw-bold">${estadisticas.estadosUnicos}</div>
+            </div>
+            <div class="col-6">
+                <small class="text-muted">Interventores:</small>
+                <div class="fw-bold">${estadisticas.interventoresUnicos}</div>
+            </div>
         </div>
     `;
 }
 
 // Mostrar información detallada de un punto
 function mostrarInfoPunto(punto) {
-    const infoDiv = document.getElementById('infoPunto');
     const contenido = document.getElementById('contenidoInfoPunto');
     
     contenido.innerHTML = `
@@ -646,130 +509,63 @@ function mostrarInfoPunto(punto) {
             <span class="badge" style="background-color: ${coloresPorEstado[punto.estado_obra]}">${punto.estado_obra}</span>
         </p>
         <p><strong>Interventor:</strong> ${punto.nombre_interventor}</p>
+        <p><strong>Fecha:</strong> ${punto.fecha_diligenciamiento}</p>
         <p><strong>Trabajadores:</strong> ${punto.total_trabajadores}</p>
         <p><strong>Horas:</strong> ${punto.total_horas}</p>
-        <p><strong>Fecha:</strong> ${punto.fecha_diligenciamiento}</p>
-        <p><strong>Coordenadas:</strong><br>
-            <small class="text-muted">Lat: ${punto.lat.toFixed(6)}<br>
-            Lng: ${punto.lng.toFixed(6)}</small>
-        </p>
-        <div class="text-center mt-3">
-            <button class="btn btn-outline-primary btn-sm" onclick="centrarEnPunto(${punto.lat}, ${punto.lng})">
-                <i class="fas fa-crosshairs"></i> Centrar
-            </button>
-            <button class="btn btn-outline-info btn-sm" onclick="buscarCercanos('${punto.id_punto}')">
-                <i class="fas fa-search"></i> Ver Cercanos
-            </button>
-        </div>
+        <p><strong>Coordenadas:</strong> ${punto.lat.toFixed(6)}, ${punto.lng.toFixed(6)}</p>
     `;
     
-    infoDiv = document.getElementById('infoPunto');
     showPanel('infoPunto');
 }
 
 // Ocultar información del punto
 function ocultarInfoPunto() {
     hidePanel('infoPunto');
-    hidePanel('puntosCercanos');
 }
 
-// Centrar mapa en coordenadas específicas
-function centrarEnPunto(lat, lng) {
-    mapa.setView([lat, lng], 16);
+// Funciones de filtros
+function aplicarFiltroMapa() {
+    actualizarMapa();
+    actualizarEstadisticas();
 }
 
-// Centrar mapa en vista general
+function limpiarFiltrosMapa() {
+    document.getElementById('filtroEstado').value = '';
+    document.getElementById('filtroInterventor').value = '';
+    aplicarFiltroMapa();
+}
+
+// Función de centrar mapa
 function centrarMapa() {
-    mapa.setView(configMapa.centro, configMapa.zoom);
+    if (datosPuntos.length > 0) {
+        const bounds = L.latLngBounds(datosPuntos.map(p => [p.lat, p.lng]));
+        mapa.fitBounds(bounds, { padding: [20, 20] });
+    } else {
+        mapa.setView(configMapa.centro, configMapa.zoom);
+    }
 }
 
-// Toggle leyenda
-function toggleLeyenda() {
-    const leyenda = document.getElementById('leyendaCard');
-    leyenda.style.display = leyenda.style.display === 'none' ? 'block' : 'none';
-}
-
-// Toggle panel de filtros
-function toggleFiltros() {
-    modalConfiguracion.show();
-}
-
-// Ver estadísticas
-function verEstadisticas() {
-    window.open('/ver_analisis', '_blank');
-}
-
-// Cambiar tipo de visualización
+// Función de cambiar visualización (placeholder)
 function cambiarVisualizacion() {
     const tipo = document.getElementById('tipoVisualizacion').value;
-    // Implementar diferentes tipos de visualización
     console.log('Cambiar visualización a:', tipo);
+    // TODO: Implementar diferentes tipos de visualización
 }
 
-// Exportar mapa
+// Función de exportar (placeholder)
 function exportarMapa() {
-    // Implementar exportación del mapa
-    alert('Funcionalidad de exportación en desarrollo');
+    console.log('Exportar mapa');
+    // TODO: Implementar exportación
 }
 
-// Buscar puntos cercanos
-function buscarCercanos(puntoId) {
-    const punto = datosPuntos.find(p => p.id_punto === puntoId);
-    if (!punto) return;
-    
-    // Calcular distancias (simplificado)
-    const cercanos = datosPuntos
-        .filter(p => p.id_punto !== puntoId)
-        .map(p => ({
-            ...p,
-            distancia: calcularDistancia(punto.lat, punto.lng, p.lat, p.lng)
-        }))
-        .filter(p => p.distancia < 1) // Menos de 1 km
-        .sort((a, b) => a.distancia - b.distancia)
-        .slice(0, 5);
-    
-    if (cercanos.length === 0) {
-        document.getElementById('listaPuntosCercanos').innerHTML = 
-            '<small class="text-muted">No hay puntos cercanos en un radio de 1 km</small>';
-    } else {
-        const html = cercanos.map(p => `
-            <div class="border-bottom py-2">
-                <div class="d-flex justify-content-between">
-                    <span><strong>${p.id_punto}</strong></span>
-                    <small class="text-muted">${(p.distancia * 1000).toFixed(0)}m</small>
-                </div>
-                <small class="text-muted">${p.estado_obra} - ${p.nombre_interventor}</small>
-            </div>
-        `).join('');
-        
-        document.getElementById('listaPuntosCercanos').innerHTML = html;
-    }
-    
-    showPanel('puntosCercanos');
-}
-
-// Calcular distancia entre dos puntos (fórmula de Haversine simplificada)
-function calcularDistancia(lat1, lng1, lat2, lng2) {
-    const R = 6371; // Radio de la Tierra en km
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLng = (lng2 - lng1) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLng/2) * Math.sin(dLng/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c;
-}
-
-// Aplicar configuración del modal
-function aplicarConfiguracion() {
-    // Implementar aplicación de configuración avanzada
-    modalConfiguracion.hide();
-    mostrarAlerta('Configuración aplicada', 'success');
-}
-
-// Función auxiliar para mostrar carga
+// Función para mostrar/ocultar carga
 function mostrarCarga(mostrar) {
-    // Implementar indicador de carga si es necesario
+    // Simple indicador de carga en consola
+    if (mostrar) {
+        console.log('Cargando datos del mapa...');
+    } else {
+        console.log('Carga completada.');
+    }
 }
 </script>
 {% endblock %}
