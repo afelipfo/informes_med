@@ -418,7 +418,70 @@ def crear_aplicacion():
                 )
             
             elif formato.lower() == 'pdf':
-                return jsonify({'mensaje': 'Generación de PDF en desarrollo', 'formato': formato})
+                from reportlab.pdfgen import canvas
+                from reportlab.lib.pagesizes import letter
+                from reportlab.lib.styles import getSampleStyleSheet
+                from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+                from reportlab.lib import colors
+                from io import BytesIO
+                
+                # Crear PDF en memoria
+                buffer = BytesIO()
+                doc = SimpleDocTemplate(buffer, pagesize=letter)
+                styles = getSampleStyleSheet()
+                story = []
+                
+                # Título
+                title = Paragraph("INFORME DETALLADO - SURVEY123", styles['Title'])
+                story.append(title)
+                story.append(Spacer(1, 20))
+                
+                # Información general
+                from modulos.analisis import AnalisisSurvey123
+                analizador = AnalisisSurvey123(app.datos_cargados)
+                analisis = analizador.generar_analisis_completo()
+                
+                # Metadata
+                if 'metadata' in analisis:
+                    metadata = analisis['metadata']
+                    metadata_text = f"""
+                    <b>INFORMACIÓN GENERAL:</b><br/>
+                    • Total de registros: {metadata.get('total_registros', 0)}<br/>
+                    • Columnas analizadas: {metadata.get('columnas_analizadas', 0)}<br/>
+                    • Fecha de procesamiento: {datetime.now().strftime('%d/%m/%Y %H:%M')}<br/><br/>
+                    """
+                    story.append(Paragraph(metadata_text, styles['Normal']))
+                
+                # Recursos Humanos
+                if 'recursos_humanos' in analisis:
+                    rh = analisis['recursos_humanos']
+                    rh_text = f"""
+                    <b>RECURSOS HUMANOS:</b><br/>
+                    • Total trabajadores: {rh.get('total_trabajadores', 0)}<br/>
+                    • Total horas trabajadas: {rh.get('total_horas_trabajadas', 0):.1f}<br/>
+                    • Promedio horas por registro: {rh.get('promedio_horas_registro', 0):.2f}<br/><br/>
+                    """
+                    story.append(Paragraph(rh_text, styles['Normal']))
+                
+                # Actividades
+                if 'actividades' in analisis:
+                    actividades = analisis['actividades']
+                    act_text = "<b>ACTIVIDADES PRINCIPALES:</b><br/>"
+                    for actividad, datos in actividades.items():
+                        if isinstance(datos, dict) and 'cantidad' in datos:
+                            act_text += f"• {actividad}: {datos['cantidad']} registros<br/>"
+                    story.append(Paragraph(act_text, styles['Normal']))
+                
+                # Construir el PDF
+                doc.build(story)
+                buffer.seek(0)
+                
+                return send_file(
+                    buffer,
+                    as_attachment=True,
+                    download_name=f'informe_detallado_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf',
+                    mimetype='application/pdf'
+                )
             
             else:
                 return jsonify({'error': 'Formato no soportado. Use "excel" o "pdf"'}), 400
@@ -492,6 +555,71 @@ def crear_aplicacion():
             
         except Exception as e:
             app.logger.error(f"Error generando informe geográfico: {str(e)}")
+            return jsonify({'error': 'Error generando informe', 'detalles': str(e)}), 500
+
+    @app.route('/api/generar_informe_ejecutivo')
+    def api_generar_informe_ejecutivo():
+        """Generar resumen ejecutivo en formato PDF"""
+        if app.datos_cargados is None:
+            return jsonify({'error': 'No hay datos cargados'}), 400
+        
+        try:
+            from reportlab.pdfgen import canvas
+            from reportlab.lib.pagesizes import letter
+            from reportlab.lib.styles import getSampleStyleSheet
+            from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+            from io import BytesIO
+            
+            # Crear PDF en memoria
+            buffer = BytesIO()
+            doc = SimpleDocTemplate(buffer, pagesize=letter)
+            styles = getSampleStyleSheet()
+            story = []
+            
+            # Título
+            title = Paragraph("RESUMEN EJECUTIVO - SURVEY123", styles['Title'])
+            story.append(title)
+            story.append(Spacer(1, 20))
+            
+            # Resumen de datos
+            total_registros = len(app.datos_cargados)
+            total_trabajadores = app.datos_cargados['num_total_'].sum() if 'num_total_' in app.datos_cargados.columns else 0
+            total_horas = app.datos_cargados['total_hora'].sum() if 'total_hora' in app.datos_cargados.columns else 0
+            
+            # Información básica
+            summary_text = f"""
+            <b>DATOS GENERALES:</b><br/>
+            • Total de registros procesados: {total_registros}<br/>
+            • Total de trabajadores involucrados: {int(total_trabajadores)}<br/>
+            • Total de horas trabajadas: {total_horas:.1f}<br/>
+            • Puntos geográficos únicos: {app.datos_cargados['id_punto'].nunique() if 'id_punto' in app.datos_cargados.columns else 'N/A'}<br/><br/>
+            
+            <b>DISTRIBUCIÓN POR ESTADO:</b><br/>
+            """
+            
+            if 'estado_obr' in app.datos_cargados.columns:
+                estados = app.datos_cargados['estado_obr'].value_counts()
+                for estado, cantidad in estados.items():
+                    summary_text += f"• {estado}: {cantidad} registros<br/>"
+            
+            summary_text += f"<br/><b>FECHA DE GENERACIÓN:</b> {datetime.now().strftime('%d/%m/%Y %H:%M')}"
+            
+            summary_para = Paragraph(summary_text, styles['Normal'])
+            story.append(summary_para)
+            
+            # Construir el PDF
+            doc.build(story)
+            buffer.seek(0)
+            
+            return send_file(
+                buffer,
+                as_attachment=True,
+                download_name=f'resumen_ejecutivo_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf',
+                mimetype='application/pdf'
+            )
+            
+        except Exception as e:
+            app.logger.error(f"Error generando resumen ejecutivo: {str(e)}")
             return jsonify({'error': 'Error generando informe', 'detalles': str(e)}), 500
 
     @app.route('/mapa_intervenciones')

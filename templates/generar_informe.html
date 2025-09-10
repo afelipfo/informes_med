@@ -77,98 +77,31 @@
             <div class="config-card">
                 <div class="config-header">
                     <h5 class="mb-0">
-                        <i class="fas fa-cog me-2"></i>Configuración del Informe
+                        <i class="fas fa-download me-2"></i>Generar Informes
                     </h5>
                 </div>
-                <div class="config-body">
-                    <div class="row g-4">
-                        <!-- Filtros por estado -->
-                        <div class="col-md-6">
-                            <div class="config-group">
-                                <label class="form-label">Estados de Obra</label>
-                                <select class="form-select" id="configEstados" multiple>
-                                    <option value="terminado">Terminado</option>
-                                    <option value="en_ejecucion">En Ejecución</option>
-                                    <option value="pendiente">Pendiente</option>
-                                    <option value="suspendido">Suspendido</option>
-                                </select>
-                                <div class="form-text">Seleccione uno o más estados</div>
-                            </div>
+                <div class="config-body text-center">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <button class="btn btn-primary btn-lg w-100 h-100" onclick="generarInformeEspecifico('estadistico')" style="min-height: 120px;">
+                                <i class="fas fa-chart-bar fa-2x mb-2 d-block"></i>
+                                <span class="fw-bold d-block">Generar Estadístico</span>
+                                <small class="text-light">PDF con gráficos y métricas</small>
+                            </button>
                         </div>
-
-                        <!-- Filtros por comuna -->
-                        <div class="col-md-6">
-                            <div class="config-group">
-                                <label class="form-label">Comunas</label>
-                                <select class="form-select" id="configComunas" multiple>
-                                    <option value="">Cargar desde datos...</option>
-                                </select>
-                                <div class="form-text">Seleccione las comunas a incluir</div>
-                            </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-success btn-lg w-100 h-100" onclick="generarInformeEspecifico('detallado')" style="min-height: 120px;">
+                                <i class="fas fa-list-alt fa-2x mb-2 d-block"></i>
+                                <span class="fw-bold d-block">Generar Detallado</span>
+                                <small class="text-light">PDF con análisis completo</small>
+                            </button>
                         </div>
-
-                        <!-- Rango de fechas -->
-                        <div class="col-md-6">
-                            <div class="config-group">
-                                <label class="form-label">Rango de Fechas</label>
-                                <div class="row g-2">
-                                    <div class="col-6">
-                                        <input type="date" class="form-control" id="configFechaInicio">
-                                    </div>
-                                    <div class="col-6">
-                                        <input type="date" class="form-control" id="configFechaFin">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Secciones a incluir -->
-                        <div class="col-md-6">
-                            <div class="config-group">
-                                <label class="form-label">Secciones a Incluir</label>
-                                <div class="config-checkboxes">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="incluirEstadisticas" checked>
-                                        <label class="form-check-label" for="incluirEstadisticas">
-                                            <i class="fas fa-chart-pie me-1"></i>Estadísticas
-                                        </label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="incluirGraficos" checked>
-                                        <label class="form-check-label" for="incluirGraficos">
-                                            <i class="fas fa-chart-bar me-1"></i>Gráficos
-                                        </label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="incluirMapas">
-                                        <label class="form-check-label" for="incluirMapas">
-                                            <i class="fas fa-map me-1"></i>Mapas
-                                        </label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="incluirTablas" checked>
-                                        <label class="form-check-label" for="incluirTablas">
-                                            <i class="fas fa-table me-1"></i>Tablas Detalladas
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Botones de generación -->
-                    <div class="config-actions">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <button class="btn btn-primary btn-lg w-100" onclick="generarInforme('pdf')">
-                                    <i class="fas fa-file-pdf me-2"></i>Generar PDF
-                                </button>
-                            </div>
-                            <div class="col-md-6">
-                                <button class="btn btn-outline-primary btn-lg w-100" onclick="generarInforme('excel')">
-                                    <i class="fas fa-file-excel me-2"></i>Generar Excel
-                                </button>
-                            </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-info btn-lg w-100 h-100" onclick="generarInformeEspecifico('ejecutivo')" style="min-height: 120px;">
+                                <i class="fas fa-briefcase fa-2x mb-2 d-block"></i>
+                                <span class="fw-bold d-block">Generar Ejecutivo</span>
+                                <small class="text-light">PDF resumen ejecutivo</small>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -216,108 +149,11 @@
     </div>
 
     <!-- Loader durante generación -->
-    <div class="text-center mt-4 loading-spinner" id="loadingInforme">
+    <div class="text-center mt-4 loading-spinner" id="loadingInforme" style="display: none;">
         <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Generando informe...</span>
         </div>
         <p class="mt-2">Generando informe, por favor espere...</p>
-    </div>
-                </div>
-                <div class="card-body">
-                    <form id="configuracionInformes">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="filtroEstado" class="form-label">Filtrar por Estado de Obra</label>
-                                    <select class="form-select" id="filtroEstado" name="filtroEstado">
-                                        <option value="">Todos los estados</option>
-                                        <option value="En ejecucion">En ejecución</option>
-                                        <option value="Terminada">Terminada</option>
-                                        <option value="En proceso">En proceso</option>
-                                        <option value="Pendiente">Pendiente</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="filtroComuna" class="form-label">Filtrar por Comuna</label>
-                                    <select class="form-select" id="filtroComuna" name="filtroComuna">
-                                        <option value="">Todas las comunas</option>
-                                        <option value="1">Comuna 1</option>
-                                        <option value="2">Comuna 2</option>
-                                        <option value="3">Comuna 3</option>
-                                        <option value="4">Comuna 4</option>
-                                        <option value="5">Comuna 5</option>
-                                        <option value="6">Comuna 6</option>
-                                        <option value="7">Comuna 7</option>
-                                        <option value="8">Comuna 8</option>
-                                        <option value="9">Comuna 9</option>
-                                        <option value="10">Comuna 10</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="fechaInicio" class="form-label">Fecha de Inicio</label>
-                                    <input type="date" class="form-control" id="fechaInicio" name="fechaInicio">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="fechaFin" class="form-label">Fecha de Fin</label>
-                                    <input type="date" class="form-control" id="fechaFin" name="fechaFin">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="mb-3">
-                                    <label class="form-label">Secciones a Incluir</label>
-                                    <div class="row">
-                                        <div class="col-md-3">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="incluirEstadisticas" name="secciones" value="estadisticas" checked>
-                                                <label class="form-check-label" for="incluirEstadisticas">
-                                                    Estadísticas Generales
-                                                </label>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="incluirGraficos" name="secciones" value="graficos" checked>
-                                                <label class="form-check-label" for="incluirGraficos">
-                                                    Gráficos y Visualizaciones
-                                                </label>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="incluirMapas" name="secciones" value="mapas" checked>
-                                                <label class="form-check-label" for="incluirMapas">
-                                                    Mapas Geográficos
-                                                </label>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="incluirTablas" name="secciones" value="tablas" checked>
-                                                <label class="form-check-label" for="incluirTablas">
-                                                    Tablas Detalladas
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- Historial de informes -->
@@ -391,6 +227,70 @@ document.addEventListener('DOMContentLoaded', function() {
     
     cargarHistorial();
 });
+
+// Función específica para generar informes desde los botones
+async function generarInformeEspecifico(tipo) {
+    // Mostrar loader
+    document.getElementById('loadingInforme').style.display = 'block';
+    
+    try {
+        let url;
+        if (tipo === 'estadistico') {
+            url = '/api/generar_informe_estadistico';
+        } else if (tipo === 'detallado') {
+            url = '/api/generar_informe_detallado/pdf';
+        } else if (tipo === 'ejecutivo') {
+            url = '/api/generar_informe_ejecutivo';
+        }
+        
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        
+        if (response.ok) {
+            const contentType = response.headers.get('content-type');
+            
+            // Si es un archivo descargable
+            if (contentType && contentType.includes('application/pdf')) {
+                const blob = await response.blob();
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                
+                a.download = `informe_${tipo}_${new Date().toISOString().split('T')[0]}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(downloadUrl);
+                document.body.removeChild(a);
+                
+                // Agregar al historial
+                agregarAlHistorial(tipo, 'pdf');
+                
+                mostrarAlerta('Informe generado exitosamente', 'success');
+            } else {
+                // Si es una respuesta JSON
+                const data = await response.json();
+                if (data.mensaje) {
+                    mostrarAlerta(data.mensaje, 'info');
+                } else {
+                    mostrarAlerta('Informe procesado correctamente', 'success');
+                }
+            }
+        } else {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
+        }
+        
+    } catch (error) {
+        console.error('Error:', error);
+        mostrarAlerta('Error al generar el informe: ' + error.message, 'danger');
+    } finally {
+        document.getElementById('loadingInforme').style.display = 'none';
+    }
+}
 
 // Función principal para generar informes
 async function generarInforme(tipo, formato = 'pdf') {
@@ -477,10 +377,7 @@ function recopilarConfiguracion() {
     const formData = new FormData(form);
     
     const configuracion = {
-        filtroEstado: formData.get('filtroEstado'),
         filtroComuna: formData.get('filtroComuna'),
-        fechaInicio: formData.get('fechaInicio'),
-        fechaFin: formData.get('fechaFin'),
         secciones: formData.getAll('secciones')
     };
     
