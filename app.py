@@ -48,10 +48,10 @@ def crear_aplicacion():
     """Factory pattern para crear la aplicación Flask"""
     app = Flask(__name__)
     app.config.from_object(Config)
-    
+
     # Marcar tiempo de inicio para uptime
     app.start_time = time.time()
-    
+
     # Configurar logging - mostrar solo mensajes esenciales
     if not app.debug:
         # Configurar logging para mostrar solo el mensaje de inicio del servidor
@@ -67,7 +67,15 @@ def crear_aplicacion():
         handler = logging.StreamHandler()
         handler.setFormatter(logging.Formatter(' * %(message)s'))
         werkzeug_logger.addHandler(handler)
-    
+
+    # Crear directorios necesarios si no existen (importante para Vercel)
+    try:
+        os.makedirs(app.config.get('UPLOAD_FOLDER', 'datos/uploads'), exist_ok=True)
+        os.makedirs(app.config.get('PROCESSED_FOLDER', 'datos/procesados'), exist_ok=True)
+        os.makedirs(app.config.get('REPORTS_FOLDER', 'datos/reportes_generados'), exist_ok=True)
+    except Exception as e:
+        app.logger.warning(f"No se pudieron crear directorios: {e}")
+
     # Variables globales de la aplicación
     app.datos_cargados = None
     app.procesador = ProcesadorSurvey123(Config)
@@ -642,7 +650,12 @@ def crear_aplicacion():
     def health_check():
         """Endpoint de health check para monitoreo"""
         try:
-            import psutil
+            # Intentar importar psutil, si no está disponible usar versión simplificada
+            try:
+                import psutil
+                psutil_available = True
+            except ImportError:
+                psutil_available = False
             
             # Verificar estado de la aplicación
             health_status = {
@@ -652,12 +665,18 @@ def crear_aplicacion():
                 'uptime_seconds': time.time() - app.start_time if hasattr(app, 'start_time') else 0
             }
             
-            # Verificar memoria
-            memoria = psutil.virtual_memory()
-            health_status['memory'] = {
-                'used_percent': round(memoria.percent, 2),
-                'available_gb': round(memoria.available / (1024**3), 2)
-            }
+            # Verificar memoria si psutil está disponible
+            if psutil_available:
+                memoria = psutil.virtual_memory()
+                health_status['memory'] = {
+                    'used_percent': round(memoria.percent, 2),
+                    'available_gb': round(memoria.available / (1024**3), 2)
+                }
+            else:
+                health_status['memory'] = {
+                    'used_percent': 'N/A',
+                    'available_gb': 'N/A'
+                }
             
             # Verificar espacio en disco
             upload_folder = app.config.get('UPLOAD_FOLDER', '.')
@@ -695,7 +714,10 @@ def crear_aplicacion():
             }
             
             # Determinar estado general
-            memoria_ok = memoria.percent < 90
+            if psutil_available:
+                memoria_ok = memoria.percent < 90
+            else:
+                memoria_ok = True  # Si no hay psutil, asumimos que está OK
             disco_ok = health_status.get('disk', {}).get('free_space_gb', 0) > 0.5
             directorios_ok = all(
                 dir_info.get('exists', False) and dir_info.get('writable', False)
@@ -730,33 +752,54 @@ def crear_aplicacion():
     def metrics():
         """Endpoint de métricas para monitoreo avanzado"""
         try:
-            import psutil
+            # Intentar importar psutil
+            try:
+                import psutil
+                psutil_available = True
+                proceso = psutil.Process()
+            except ImportError:
+                psutil_available = False
+                proceso = None
             
-            proceso = psutil.Process()
-            
-            metrics_data = {
-                'timestamp': datetime.now().isoformat(),
-                'system': {
-                    'cpu_percent': psutil.cpu_percent(interval=1),
-                    'memory_percent': psutil.virtual_memory().percent,
-                    'disk_usage_percent': psutil.disk_usage('/').percent if os.name == 'posix' else psutil.disk_usage('C:\\').percent
-                },
-                'process': {
-                    'memory_mb': round(proceso.memory_info().rss / 1024 / 1024, 2),
-                    'cpu_percent': proceso.cpu_percent(),
-                    'threads': proceso.num_threads(),
-                    'open_files': len(proceso.open_files())
-                },
-                'application': {
-                    'data_loaded': app.datos_cargados is not None,
-                    'records_count': len(app.datos_cargados) if app.datos_cargados is not None else 0,
-                    'config_valid': all([
-                        app.config.get('SECRET_KEY'),
-                        app.config.get('UPLOAD_FOLDER'),
-                        app.config.get('REQUIRED_COLUMNS')
-                    ])
+            if psutil_available:
+                metrics_data = {
+                    'timestamp': datetime.now().isoformat(),
+                    'system': {
+                        'cpu_percent': psutil.cpu_percent(interval=1),
+                        'memory_percent': psutil.virtual_memory().percent,
+                        'disk_usage_percent': psutil.disk_usage('/').percent if os.name == 'posix' else psutil.disk_usage('C:\\').percent
+                    },
+                    'process': {
+                        'memory_mb': round(proceso.memory_info().rss / 1024 / 1024, 2),
+                        'cpu_percent': proceso.cpu_percent(),
+                        'threads': proceso.num_threads(),
+                        'open_files': len(proceso.open_files())
+                    },
                 }
-            }
+            else:
+                metrics_data = {
+                    'timestamp': datetime.now().isoformat(),
+                    'system': {
+                        'cpu_percent': 'N/A',
+                        'memory_percent': 'N/A',
+                        'disk_usage_percent': 'N/A'
+                    },
+                    'process': {
+                        'memory_mb': 'N/A',
+                        'cpu_percent': 'N/A',
+                        'threads': 'N/A',
+                        'open_files': 'N/A'
+                    },
+                    'application': {
+                        'data_loaded': app.datos_cargados is not None,
+                        'records_count': len(app.datos_cargados) if app.datos_cargados is not None else 0,
+                        'config_valid': all([
+                            app.config.get('SECRET_KEY'),
+                            app.config.get('UPLOAD_FOLDER'),
+                            app.config.get('REQUIRED_COLUMNS')
+                        ])
+                    }
+                }
             
             return jsonify(metrics_data)
             

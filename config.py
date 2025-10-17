@@ -4,15 +4,23 @@ from datetime import timedelta
 
 class Config:
     """Configuración base de la aplicación"""
-    
+
     # Configuración básica de Flask
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
-    
-    # Configuración de archivos
-    UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'datos', 'uploads')
-    PROCESSED_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'datos', 'procesados')
-    REPORTS_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'datos', 'reportes_generados')
-    MAPS_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'datos', 'mapas')
+
+    # Detectar si estamos en Vercel
+    IS_VERCEL = os.environ.get('VERCEL') == '1'
+
+    # Configuración de archivos (usar /tmp en Vercel)
+    if IS_VERCEL:
+        BASE_DIR = '/tmp'
+    else:
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+    UPLOAD_FOLDER = os.path.join(BASE_DIR, 'datos', 'uploads')
+    PROCESSED_FOLDER = os.path.join(BASE_DIR, 'datos', 'procesados')
+    REPORTS_FOLDER = os.path.join(BASE_DIR, 'datos', 'reportes_generados')
+    MAPS_FOLDER = os.path.join(BASE_DIR, 'datos', 'mapas')
     
     # Tamaño máximo de archivo (16MB)
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024
