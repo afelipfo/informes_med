@@ -823,10 +823,16 @@ def crear_aplicacion():
 if __name__ == '__main__':
     print("🚀 INICIANDO SISTEMA DE INFORMES SURVEY123")
     print("🏛️  Secretaría de Infraestructura Física de Medellín")
-    
+
     app = crear_aplicacion()
-    
-    app.run(host='127.0.0.1', port=5000, debug=False)
+
+    # Obtener puerto de variable de entorno (para Railway/Render/Heroku)
+    port = int(os.environ.get('PORT', 5000))
+    host = os.environ.get('HOST', '0.0.0.0')
+
+    print(f"📡 Servidor iniciando en {host}:{port}")
+
+    app.run(host=host, port=port, debug=False)
 else:
     # Para importación directa
     app = crear_aplicacion()

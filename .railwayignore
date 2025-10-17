@@ -1,0 +1,45 @@
+# Archivos a ignorar en Railway
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Entornos virtuales
+venv/
+env/
+ENV/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Archivos temporales
+*.log
+.DS_Store
+Thumbs.db
+
+# Tests
+tests/
+*.test.py
+
+# Documentación local
+docs/
+Diagrama.png
+
+# Git
+.git/
+
+# Requirements alternativo de Vercel
+requirements-vercel-minimal.txt
+
+# Datos locales (Railway usará storage o BD)
+datos/uploads/*.xlsx
+datos/procesados/*.xlsx
+datos/reportes_generados/*.pdf
+
+# Mantener estructura de directorios
+!datos/uploads/.gitkeep
+!datos/procesados/.gitkeep
+!datos/reportes_generados/.gitkeep
