@@ -23,21 +23,33 @@ try:
     from reportlab.lib.units import inch
     from reportlab.lib import colors
     from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
+    REPORTLAB_DISPONIBLE = True
 except ImportError:
-    print("ReportLab no está instalado. Instale con: pip install reportlab")
+    REPORTLAB_DISPONIBLE = False
+    print("ADVERTENCIA: ReportLab no está instalado. Instale con: pip install reportlab")
 
 try:
     from docx import Document
     from docx.shared import Inches, Cm
     from docx.enum.text import WD_ALIGN_PARAGRAPH
     from docx.enum.table import WD_TABLE_ALIGNMENT
+    DOCX_DISPONIBLE = True
 except ImportError:
-    print("python-docx no está instalado. Instale con: pip install python-docx")
+    DOCX_DISPONIBLE = False
+    print("ADVERTENCIA: python-docx no está instalado. Instale con: pip install python-docx")
 
 import matplotlib.pyplot as plt
 import seaborn as sns
-import plotly.express as px
-import plotly.graph_objects as go
+
+# Importar plotly si está disponible
+try:
+    import plotly.express as px
+    import plotly.graph_objects as go
+    PLOTLY_DISPONIBLE = True
+except ImportError:
+    PLOTLY_DISPONIBLE = False
+    px = None
+    go = None
 
 class GeneradorReportes:
     """
@@ -188,6 +200,25 @@ class GeneradorReportes:
     def generar_reporte_pdf(self, nombre_archivo: str = None, incluir_graficos: bool = True) -> str:
         """
         Genera un reporte en formato PDF
+
+        Args:
+            nombre_archivo: Nombre del archivo de salida
+            incluir_graficos: Si incluir gráficos en el reporte
+
+        Returns:
+            Ruta del archivo generado
+
+        Raises:
+            ImportError: Si ReportLab no está instalado
+        """
+        if not REPORTLAB_DISPONIBLE:
+            raise ImportError("ReportLab no está instalado. Instale con: pip install reportlab")
+
+        return self._generar_reporte_pdf_interno(nombre_archivo, incluir_graficos)
+
+    def _generar_reporte_pdf_interno(self, nombre_archivo: str = None, incluir_graficos: bool = True) -> str:
+        """
+        Genera un reporte en formato PDF
         
         Args:
             nombre_archivo: Nombre del archivo de salida
@@ -275,6 +306,24 @@ class GeneradorReportes:
         return ruta_salida
     
     def generar_reporte_word(self, nombre_archivo: str = None) -> str:
+        """
+        Genera un reporte en formato Word
+
+        Args:
+            nombre_archivo: Nombre del archivo de salida
+
+        Returns:
+            Ruta del archivo generado
+
+        Raises:
+            ImportError: Si python-docx no está instalado
+        """
+        if not DOCX_DISPONIBLE:
+            raise ImportError("python-docx no está instalado. Instale con: pip install python-docx")
+
+        return self._generar_reporte_word_interno(nombre_archivo)
+
+    def _generar_reporte_word_interno(self, nombre_archivo: str = None) -> str:
         """
         Genera un reporte en formato Word
         

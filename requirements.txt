@@ -60,6 +60,7 @@ itsdangerous==2.1.2
 # Logs y monitoreo
 python-dotenv==1.0.0
 colorlog==6.8.0
+psutil==5.9.8
 
 # Cacheo
 Flask-Caching==2.1.0

@@ -9,17 +9,28 @@ __email__ = "soporte@medellin.gov.co"
 
 # Importaciones principales
 from .ingesta import ProcesadorSurvey123
-from .modelos import Intervencion, KPI, EstadoObra
-from .analisis import AnalisisSurvey123
+from .modelos import Intervencion, KPI, EstadoObra, RepositorioIntervenciones
+from .analisis import AnalisisSurvey123, AnalizadorDatos
 from .reportes import GeneradorReportes
-# from .georreferenciacion import GeorreferenciadeSurvey123  # Comentado hasta instalar geopandas
+
+# Importar georreferenciación si está disponible
+try:
+    from .georreferenciacion import GeorreferenciadeSurvey123
+    GEORREFERENCIACION_DISPONIBLE = True
+except ImportError:
+    GeorreferenciadeSurvey123 = None
+    GEORREFERENCIACION_DISPONIBLE = False
 
 __all__ = [
     'ProcesadorSurvey123',
     'Intervencion',
-    'KPI', 
+    'KPI',
     'EstadoObra',
+    'RepositorioIntervenciones',
     'AnalisisSurvey123',
+    'AnalizadorDatos',
     'GeneradorReportes',
-    # 'GeorreferenciadeSurvey123'
 ]
+
+if GEORREFERENCIACION_DISPONIBLE:
+    __all__.append('GeorreferenciadeSurvey123')

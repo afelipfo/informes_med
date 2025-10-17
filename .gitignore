@@ -59,7 +59,14 @@ bankchurn-api2.zip
 ../PGPCC/
 ../PROYECTO FINAL/
 ../Proyecto 1/
-../Rainmeter/
-*.pdf
-*.jpeg
-*.png
+../Rainmaker/
+
+# Archivos generados (reportes, mapas)
+datos/reportes_generados/*.pdf
+datos/mapas/*.png
+datos/mapas/*.html
+
+# Excluir imágenes generadas pero mantener assets estáticos
+!static/images/*.jpg
+!static/images/*.png
+!Diagrama.png
