@@ -15,11 +15,10 @@ datos/mapas/*
 !datos/procesados/.gitkeep
 !datos/reportes_generados/.gitkeep
 
-# Documentación
+# Documentación innecesaria
 docs/
-README.md
 Diagrama.png
-*.md
+DEPLOY_VERCEL.md
 
 # Scripts de instalación
 install.sh
@@ -31,7 +30,6 @@ tests/
 
 # Git
 .git/
-.gitignore
 
 # IDEs
 .vscode/
@@ -40,3 +38,9 @@ tests/
 # Archivos temporales
 *.log
 .DS_Store
+
+# Requirements completo (solo usar el optimizado)
+requirements-full.txt
+
+# WSGI no necesario con nueva estructura
+wsgi.py

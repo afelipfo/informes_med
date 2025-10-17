@@ -7,7 +7,7 @@ El proyecto ha sido **optimizado para despliegue en Vercel** con las siguientes 
 ### ✅ Archivos Creados/Modificados
 
 1. **`vercel.json`** - Configuración de despliegue
-2. **`wsgi.py`** - Punto de entrada WSGI con manejo de errores robusto
+2. **`api/index.py`** - Punto de entrada serverless para Vercel
 3. **`.vercelignore`** - Exclusión de archivos innecesarios
 4. **`requirements.txt`** - Dependencias optimizadas (reducidas de ~100MB a ~30MB)
 5. **`requirements-full.txt`** - Dependencias completas para desarrollo local
@@ -111,14 +111,15 @@ python app.py
 
 ## 🐛 Solución de Problemas
 
-### Error: "FUNCTION_INVOCATION_FAILED"
+### Error: "FUNCTION_INVOCATION_FAILED" o 404
 
-**Causa:** La función se inicializa pero crashea durante la ejecución.
+**Causa:** La función se inicializa pero crashea durante la ejecución, o Vercel no encuentra el archivo.
 
 **Soluciones:**
 1. Verificar logs en Vercel Dashboard
 2. Comprobar que no hay imports faltantes
-3. Verificar que `wsgi.py` maneja excepciones correctamente
+3. Verificar que `api/index.py` existe y tiene permisos correctos
+4. Asegurar que la estructura es: `proyecto/api/index.py`
 
 ### Error: "Serverless Function has exceeded maximum size"
 
