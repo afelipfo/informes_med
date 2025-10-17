@@ -57,6 +57,9 @@ Flask-Login==0.6.3
 Flask-Bcrypt==1.0.1
 itsdangerous==2.1.2
 
+# Servidor de producción
+gunicorn==21.2.0
+
 # Logs y monitoreo
 python-dotenv==1.0.0
 colorlog==6.8.0

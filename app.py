@@ -826,13 +826,14 @@ if __name__ == '__main__':
 
     app = crear_aplicacion()
 
-    # Obtener puerto de variable de entorno (para Railway/Render/Heroku)
+    # Obtener puerto de variable de entorno (para Render/Railway/Heroku)
     port = int(os.environ.get('PORT', 5000))
     host = os.environ.get('HOST', '0.0.0.0')
 
     print(f"📡 Servidor iniciando en {host}:{port}")
+    print("💡 Nota: En producción, usar gunicorn app:app")
 
     app.run(host=host, port=port, debug=False)
 else:
-    # Para importación directa
+    # Para importación directa (gunicorn, etc)
     app = crear_aplicacion()
