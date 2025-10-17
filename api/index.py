@@ -1,20 +1,24 @@
 """
-API entry point for Vercel
+API entry point for Vercel - WSGI compatible
 """
 import sys
 import os
 
 # Add parent directory to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, parent_dir)
 
-# Import the Flask app
+# Import and create the Flask app
 try:
     from app import crear_aplicacion
     app = crear_aplicacion()
 except Exception as e:
-    # Fallback minimal app
+    # Fallback minimal app if initialization fails
     from flask import Flask, jsonify
+
     app = Flask(__name__)
+    app.config['PROPAGATE_EXCEPTIONS'] = True
 
     @app.route('/')
     def index():
@@ -32,7 +36,6 @@ except Exception as e:
             'error': str(e)
         }), 503
 
-# Vercel expects a handler
-def handler(request):
-    """Vercel serverless handler"""
-    return app(request.environ, lambda *args: None)
+# Export app for Vercel
+# Vercel's Python runtime expects the WSGI app to be named 'app'
+# No need for a custom handler function
