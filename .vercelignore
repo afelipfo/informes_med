@@ -1,0 +1,42 @@
+# Ignorar archivos innecesarios en Vercel
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Datos y archivos grandes
+datos/uploads/*
+datos/procesados/*
+datos/reportes_generados/*
+datos/mapas/*
+
+# Mantener estructura
+!datos/uploads/.gitkeep
+!datos/procesados/.gitkeep
+!datos/reportes_generados/.gitkeep
+
+# Documentación
+docs/
+README.md
+Diagrama.png
+*.md
+
+# Scripts de instalación
+install.sh
+install.ps1
+
+# Tests
+tests/
+*.test.py
+
+# Git
+.git/
+.gitignore
+
+# IDEs
+.vscode/
+.idea/
+
+# Archivos temporales
+*.log
+.DS_Store
