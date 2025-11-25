@@ -1,14 +1,12 @@
 # Sistema de Informes Survey123
 
-## Secretaría de Infraestructura Física de Medellín
-
-## Descripción del Proyecto
+## Descripción del proyecto
 
 Sistema web desarrollado en Python Flask para el procesamiento automatizado de datos Survey123 de obras de infraestructura física urbana. Implementa algoritmos de procesamiento de lenguaje natural (NLP) e inteligencia artificial para generar informes dinámicos e insights contextuales a partir de datos de campo.
 
-## Arquitectura del Sistema
+## Arquitectura del sistema
 
-### Stack Tecnológico
+### Stack tecnológico
 
 **Backend:**
 
@@ -25,22 +23,22 @@ Sistema web desarrollado en Python Flask para el procesamiento automatizado de d
 - Folium para mapas interactivos
 - Chart.js para visualizaciones estadísticas
 
-**Procesamiento de Datos:**
+**Procesamiento de datos:**
 
 - OpenPyXL 3.1.2 para archivos Excel
 - NumPy 1.26.3 para cálculos numéricos
 - GeoPandas 0.14.3 para datos geoespaciales
 
-## Funcionalidades Principales
+## Funcionalidades principales
 
-### 1. Ingesta y Validación de Datos
+### 1. Ingesta y validación de datos
 
 - Procesamiento automático de archivos Excel Survey123 (78 variables)
 - Validación de estructura e integridad de datos
 - Limpieza automática y normalización de valores
 - Cálculo automático de totales y métricas derivadas
 
-### 2. Motor de Inteligencia Artificial
+### 2. Motor de IA
 
 - **AnalizadorInteligenteSurvey123**: Análisis semántico de las 78 variables
 - Detección automática de patrones y correlaciones estadísticas
@@ -48,15 +46,15 @@ Sistema web desarrollado en Python Flask para el procesamiento automatizado de d
 - Análisis de sentimientos y procesamiento de texto libre
 - Recomendaciones inteligentes basadas en datos
 
-### 3. Generación de Informes
+### 3. Generación de informes
 
-**Informes Tradicionales:**
+**Informes tradicionales:**
 
 - Informe Estadístico: Análisis descriptivo básico
 - Informe Detallado: Análisis completo con datos desagregados
 - Resumen Ejecutivo: Síntesis para toma de decisiones
 
-**Informes Inteligentes (IA):**
+**Informes inteligentes (IA):**
 
 - Análisis dinámico de patrones temporales
 - Correlaciones automáticas entre variables
@@ -64,21 +62,21 @@ Sistema web desarrollado en Python Flask para el procesamiento automatizado de d
 - Recomendaciones estratégicas personalizadas
 - Narrativa adaptativa según los datos
 
-### 4. Visualización Geoespacial
+### 4. Visualización geoespacial
 
 - Mapas interactivos de intervenciones por comuna
 - Clustering automático de actividades por densidad
 - Filtros dinámicos por estado, fecha y tipo de obra
 - Exportación de mapas en formato imagen
 
-### 5. Dashboard de Análisis
+### 5. Dashboard de análisis
 
 - Métricas en tiempo real de recursos humanos
 - Análisis de productividad por equipos de trabajo
 - Distribución de maquinaria y equipos
 - Cobertura territorial y concentración geográfica
 
-## Estructura del Proyecto
+## Estructura del proyecto
 
 ```tree
 informes_med/
@@ -128,7 +126,6 @@ informes_med/
 
 ## Instalación
 
-### Instalación Automática
 
 **Windows (PowerShell):**
 
@@ -182,11 +179,11 @@ python app.py
 
 ## Configuración
 
-### Configuración de Datos
+### Configuración de datos
 
 El sistema espera archivos Excel con 78 columnas específicas de Survey123:
 
-**Columnas Esenciales:**
+**Columnas esenciales:**
 
 - `Shape`, `X`, `Y`: Datos geoespaciales
 - `start`, `id_punto`: Identificadores
@@ -194,50 +191,50 @@ El sistema espera archivos Excel con 78 columnas específicas de Survey123:
 - `fecha_dilig`: Fecha de diligenciamiento
 - `nombre_int`: Nombre de la intervención
 
-**Columnas de Recursos Humanos:**
+**Columnas de recursos humanos:**
 
 - `num_obreros`, `num_ayudan`, `num_operad`, `num_conduc`: Personal
 - `nom_obrero*`, `nom_ayudan*`: Nombres del personal
 - `total_hora`: Horas trabajadas
 
-**Columnas de Maquinaria:**
+**Columnas de maquinaria:**
 
 - `tipo_maq_*`: Tipos de maquinaria
 - `placa_maq*`: Placas de equipos
 - `horas_maq*`: Horas de uso
 
-## Uso del Sistema
+## Uso del sistema
 
-### 1. Cargar Datos
+### 1. Cargar datos
 
 1. Acceder a `http://localhost:5000`
 2. Ir a "Cargar Datos"
 3. Seleccionar archivo Excel Survey123
 4. El sistema valida y procesa automáticamente
 
-### 2. Ver Análisis
+### 2. Ver análisis
 
 - Dashboard con métricas de recursos humanos
 - Análisis de maquinaria y equipos
 - Distribución de actividades por tipo
 - Cobertura territorial por comunas
 
-### 3. Generar Informes
+### 3. Generar informes
 
-**Informes Tradicionales:**
+**Informes tradicionales:**
 
 - Análisis estadístico básico
 - Tablas y gráficos descriptivos
 - Formato PDF profesional
 
-**Informes Inteligentes (IA):**
+**Informes inteligentes (IA):**
 
 - Insights dinámicos generados por NLP
 - Detección automática de patrones
 - Correlaciones estadísticas significativas
 - Recomendaciones estratégicas contextuales
 
-### 4. Visualizar Mapas
+### 4. Visualizar mapas
 
 - Mapas interactivos por comuna
 - Filtros por estado y fecha
@@ -246,7 +243,7 @@ El sistema espera archivos Excel con 78 columnas específicas de Survey123:
 
 ## API REST
 
-### Endpoints Principales
+### Endpoints principales
 
 ```http
 GET  /                              # Página principal
@@ -274,9 +271,7 @@ GET  /api/datos_mapa                # Datos para mapas
 
 ## Algoritmos de Inteligencia Artificial
 
-### Motor de Análisis NLP
-
-**AnalizadorInteligenteSurvey123** implementa:
+### Motor de análisis NLP
 
 1. **Análisis Semántico**: Mapeo de 78 variables en categorías semánticas
 2. **Detección de Patrones**: Correlaciones estadísticas automáticas
@@ -284,7 +279,7 @@ GET  /api/datos_mapa                # Datos para mapas
 4. **Análisis Temporal**: Identificación de tendencias y concentraciones
 5. **Recomendaciones**: Sugerencias basadas en correlaciones encontradas
 
-### Categorías Semánticas
+### Categorías semánticas
 
 ```python
 campos_semanticos = {
@@ -298,9 +293,9 @@ campos_semanticos = {
 }
 ```
 
-## Especificaciones Técnicas
+## Especificaciones técnicas
 
-### Límites del Sistema
+### Límites del sistema
 
 - Tamaño máximo de archivo: 16 MB
 - Formatos soportados: .xlsx, .xls
@@ -319,37 +314,18 @@ campos_semanticos = {
 - Navegadores: Chrome 90+, Firefox 88+, Edge 90+
 - Sistemas: Windows 10+, Linux, macOS 10.14+
 
-## Desarrollo y Contribución
+## Desarrollo y contribución
 
-### Estructura de Módulos
+### Estructura de módulos
 
 **modulos/ingesta.py**: Procesador principal de archivos Survey123
 **modulos/inteligencia_nlp.py**: Motor de IA y análisis NLP  
 **modulos/generador_inteligente.py**: Generador de informes con IA
 **modulos/georreferenciacion.py**: Procesamiento geoespacial
 
-### Estándares de Código
+### Estándares de código
 
 - PEP 8 para estilo Python
 - Docstrings detallados en funciones principales
 - Type hints en funciones públicas
 - Manejo de errores con logging
-
-## Licencia
-
-Proyecto desarrollado para la Secretaría de Infraestructura Física de Medellín.
-
-## Contacto
-
-**Organización**: Secretaría de Infraestructura Física de Medellín.
-
-## Changelog
-
-### v1.0.0 (2025-09-10)
-
-- Sistema base de procesamiento Survey123
-- Motor de inteligencia artificial con NLP
-- Generación dual de informes (tradicionales + IA)
-- Dashboard de análisis interactivo
-- Mapas geoespaciales con Folium
-- Interfaz web responsiva con Bootstrap
